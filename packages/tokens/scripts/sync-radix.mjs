@@ -57,17 +57,13 @@ async function writeJson(filePath, data) {
 
 async function main() {
   const light = {
-    core: {
-      color: toColorGroup(SCALES.map((scale) => ({ token: scale, source: scale }))),
-    },
+    color: toColorGroup(SCALES.map((scale) => ({ token: scale, source: scale }))),
   };
 
   const dark = {
-    core: {
-      color: toColorGroup(
-        SCALES.map((scale) => ({ token: scale, source: `${scale}Dark` })),
-      ),
-    },
+    color: toColorGroup(
+      SCALES.map((scale) => ({ token: scale, source: `${scale}Dark` })),
+    ),
   };
 
   await writeJson(resolve(root, "tokens/core/color.json"), light);

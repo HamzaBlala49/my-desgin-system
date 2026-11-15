@@ -58,6 +58,22 @@ StyleDictionary.registerFormat({
     "export declare const tokens: Record<string, string>;\nexport default tokens;\n",
 });
 
+function hasTokens(node) {
+  if (!node || typeof node !== "object") {
+    return false;
+  }
+
+  if ("value" in node || "$value" in node) {
+    return true;
+  }
+
+  return Object.values(node).some(hasTokens);
+}
+
+async function readJson(filePath) {
+  return JSON.parse(await readFile(filePath, "utf8"));
+}
+
 function collectPaths(node, path = [], out = []) {
   for (const [key, value] of Object.entries(node)) {
     const next = [...path, key];
@@ -119,6 +135,66 @@ function isDarkFile(filePath) {
   return basename(filePath).toLowerCase().includes("dark");
 }
 
+function isDarkSetName(name) {
+  return name.toLowerCase().includes("dark") || name.startsWith("themes/");
+}
+
+function deepMerge(target, source) {
+  for (const [key, value] of Object.entries(source)) {
+    const isToken =
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      ("value" in value || "$value" in value);
+
+    if (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      !isToken
+    ) {
+      if (!target[key] || typeof target[key] !== "object") {
+        target[key] = {};
+      }
+
+      deepMerge(target[key], value);
+    } else {
+      target[key] = value;
+    }
+  }
+
+  return target;
+}
+
+function mergeTokenTrees(trees) {
+  return trees.reduce((result, tree) => deepMerge(result, tree), {});
+}
+
+async function loadStudioFile() {
+  const json = await readJson(studioFile);
+  const { $themes, ...sets } = json;
+  const lightTrees = [];
+  const darkTrees = [];
+
+  for (const [name, set] of Object.entries(sets)) {
+    if (!hasTokens(set)) {
+      continue;
+    }
+
+    if (isDarkSetName(name)) {
+      darkTrees.push(set);
+    } else {
+      lightTrees.push(set);
+    }
+  }
+
+  return {
+    light: mergeTokenTrees(lightTrees),
+    dark: mergeTokenTrees(darkTrees),
+    themes: $themes ?? [],
+  };
+}
+
 async function readTokenPaths(files) {
   const contents = await Promise.all(
     files.map(async (file) => JSON.parse(await readFile(file, "utf8"))),
@@ -140,14 +216,33 @@ async function readTokenPaths(files) {
 
 async function resolveLightSources() {
   if (await exists(studioFile)) {
-    return { mode: "studio-file", sources: [studioFile] };
+    const { light } = await loadStudioFile();
+
+    if (hasTokens(light)) {
+      return { mode: "studio-file", tokens: light };
+    }
+
+    console.warn(
+      "studio.tokens.json contains no tokens. Falling back to manual tokens. Push tokens from Tokens Studio, then rebuild.",
+    );
   }
 
   const studioFiles = await listJsonFiles(studioFolder);
-  const lightFiles = studioFiles.filter((file) => !isDarkFile(file));
+  const inspected = await Promise.all(
+    studioFiles.map(async (file) => ({ file, json: await readJson(file) })),
+  );
+  const lightFiles = inspected
+    .filter(({ file, json }) => !isDarkFile(file) && hasTokens(json))
+    .map(({ file }) => file);
 
   if (lightFiles.length > 0) {
     return { mode: "studio-folder", sources: lightFiles };
+  }
+
+  if (studioFiles.length > 0) {
+    console.warn(
+      "The tokens/studio folder contains no tokens. Falling back to manual tokens.",
+    );
   }
 
   return {
@@ -164,8 +259,21 @@ async function resolveLightSources() {
 }
 
 async function resolveDarkSources() {
+  if (await exists(studioFile)) {
+    const { dark } = await loadStudioFile();
+
+    if (hasTokens(dark)) {
+      return { mode: "studio-file", tokens: dark };
+    }
+  }
+
   const studioFiles = await listJsonFiles(studioFolder);
-  const darkFiles = studioFiles.filter(isDarkFile);
+  const inspected = await Promise.all(
+    studioFiles.map(async (file) => ({ file, json: await readJson(file) })),
+  );
+  const darkFiles = inspected
+    .filter(({ file, json }) => isDarkFile(file) && hasTokens(json))
+    .map(({ file }) => file);
 
   if (darkFiles.length > 0) {
     return { mode: "studio-folder", sources: darkFiles };
@@ -215,39 +323,39 @@ function buildTailwindTheme({ semanticColors, radius, typography, shadow }) {
       continue;
     }
 
-    lines.push(`  --radius-${name}: var(--ds-core-radius-${name});`);
+    lines.push(`  --radius-${name}: var(--ds-radius-${name});`);
   }
 
   lines.push("");
   lines.push("  /* Typography */");
-  lines.push("  --spacing: var(--ds-core-space-1);");
+  lines.push("  --spacing: var(--ds-space-1);");
 
   for (const path of typography) {
     const [group, name] = path;
 
     if (group === "fontFamily") {
-      lines.push(`  --font-${name}: var(--ds-core-typography-font-family-${name});`);
+      lines.push(`  --font-${name}: var(--ds-typography-font-family-${name});`);
     }
 
     if (group === "fontSize") {
-      lines.push(`  --text-${name}: var(--ds-core-typography-font-size-${name});`);
+      lines.push(`  --text-${name}: var(--ds-typography-font-size-${name});`);
     }
 
     if (group === "fontWeight") {
       lines.push(
-        `  --font-weight-${name}: var(--ds-core-typography-font-weight-${name});`,
+        `  --font-weight-${name}: var(--ds-typography-font-weight-${name});`,
       );
     }
 
     if (group === "lineHeight") {
       lines.push(
-        `  --leading-${name}: var(--ds-core-typography-line-height-${name});`,
+        `  --leading-${name}: var(--ds-typography-line-height-${name});`,
       );
     }
 
     if (group === "letterSpacing") {
       lines.push(
-        `  --tracking-${name}: var(--ds-core-typography-letter-spacing-${name});`,
+        `  --tracking-${name}: var(--ds-typography-letter-spacing-${name});`,
       );
     }
   }
@@ -256,7 +364,7 @@ function buildTailwindTheme({ semanticColors, radius, typography, shadow }) {
   lines.push("  /* Shadow */");
 
   for (const [name] of shadow) {
-    lines.push(`  --shadow-${name}: var(--ds-core-shadow-${name});`);
+    lines.push(`  --shadow-${name}: var(--ds-shadow-${name});`);
   }
 
   return `/**\n * Auto-generated by @repo/tokens. Do not edit directly.\n */\n@import "./variables.css";\n\n@theme {\n  --color-*: initial;\n}\n\n@theme inline {\n${lines.join(
@@ -271,7 +379,9 @@ async function build() {
   const darkSources = await resolveDarkSources();
 
   const light = new StyleDictionary({
-    source: lightSources.sources,
+    ...(lightSources.tokens
+      ? { tokens: lightSources.tokens }
+      : { source: lightSources.sources }),
     preprocessors: ["tokens-studio"],
     platforms: {
       css: {
@@ -304,7 +414,9 @@ async function build() {
   });
 
   const dark = new StyleDictionary({
-    source: darkSources.sources,
+    ...(darkSources.tokens
+      ? { tokens: darkSources.tokens }
+      : { source: darkSources.sources }),
     preprocessors: ["tokens-studio"],
     platforms: {
       css: {
@@ -336,20 +448,34 @@ async function build() {
 
   await writeFile(resolve(root, "dist/variables.css"), variablesCss, "utf8");
 
-  const lightPaths = await readTokenPaths(lightSources.sources);
+  const lightPaths = lightSources.tokens
+    ? collectPaths(lightSources.tokens)
+    : await readTokenPaths(lightSources.sources);
 
   const semanticColors = lightPaths
     .filter((path) => path[0] === "semantic" && path[1] === "color")
     .map((path) => path.slice(2));
   const radius = lightPaths
-    .filter((path) => path[0] === "core" && path[1] === "radius")
-    .map((path) => path.slice(2));
+    .filter((path) => path[0] === "radius")
+    .map((path) => path.slice(1));
   const typography = lightPaths
-    .filter((path) => path[0] === "core" && path[1] === "typography")
-    .map((path) => path.slice(2));
+    .filter((path) => path[0] === "typography")
+    .map((path) => path.slice(1));
   const shadow = lightPaths
-    .filter((path) => path[0] === "core" && path[1] === "shadow")
-    .map((path) => path.slice(2));
+    .filter((path) => path[0] === "shadow")
+    .map((path) => path.slice(1));
+
+  if (semanticColors.length === 0) {
+    console.warn(
+      "No semantic.color.* tokens found. Components rely on semantic.color.* paths.",
+    );
+  }
+
+  if (radius.length === 0 || typography.length === 0 || shadow.length === 0) {
+    console.warn(
+      "Some core tokens are missing. Expected radius.*, typography.* and shadow.*.",
+    );
+  }
 
   const tailwindCss = buildTailwindTheme({
     semanticColors,

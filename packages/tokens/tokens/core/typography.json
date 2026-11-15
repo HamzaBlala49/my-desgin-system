@@ -1,41 +1,93 @@
 {
-  "core": {
-    "typography": {
-      "fontFamily": {
-        "sans": {
-          "value": "\"Inter\", \"IBM Plex Sans Arabic\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
-          "type": "fontFamilies"
-        },
-        "mono": {
-          "value": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, monospace",
-          "type": "fontFamilies"
-        }
+  "typography": {
+    "fontFamily": {
+      "sans": {
+        "value": "\"Inter\", \"IBM Plex Sans Arabic\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "type": "fontFamilies"
       },
-      "fontSize": {
-        "xs": { "value": "0.75rem", "type": "fontSizes" },
-        "sm": { "value": "0.875rem", "type": "fontSizes" },
-        "md": { "value": "1rem", "type": "fontSizes" },
-        "lg": { "value": "1.125rem", "type": "fontSizes" },
-        "xl": { "value": "1.25rem", "type": "fontSizes" },
-        "2xl": { "value": "1.5rem", "type": "fontSizes" },
-        "3xl": { "value": "1.875rem", "type": "fontSizes" },
-        "4xl": { "value": "2.25rem", "type": "fontSizes" }
+      "mono": {
+        "value": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, monospace",
+        "type": "fontFamilies"
+      }
+    },
+    "fontSize": {
+      "xs": {
+        "value": "0.75rem",
+        "type": "fontSizes"
       },
-      "fontWeight": {
-        "normal": { "value": "400", "type": "fontWeights" },
-        "medium": { "value": "500", "type": "fontWeights" },
-        "semibold": { "value": "600", "type": "fontWeights" },
-        "bold": { "value": "700", "type": "fontWeights" }
+      "sm": {
+        "value": "0.875rem",
+        "type": "fontSizes"
       },
-      "lineHeight": {
-        "tight": { "value": "1.25", "type": "lineHeights" },
-        "normal": { "value": "1.5", "type": "lineHeights" },
-        "relaxed": { "value": "1.75", "type": "lineHeights" }
+      "md": {
+        "value": "1rem",
+        "type": "fontSizes"
       },
-      "letterSpacing": {
-        "tight": { "value": "-0.01em", "type": "letterSpacing" },
-        "normal": { "value": "0em", "type": "letterSpacing" },
-        "wide": { "value": "0.01em", "type": "letterSpacing" }
+      "lg": {
+        "value": "1.125rem",
+        "type": "fontSizes"
+      },
+      "xl": {
+        "value": "1.25rem",
+        "type": "fontSizes"
+      },
+      "2xl": {
+        "value": "1.5rem",
+        "type": "fontSizes"
+      },
+      "3xl": {
+        "value": "1.875rem",
+        "type": "fontSizes"
+      },
+      "4xl": {
+        "value": "2.25rem",
+        "type": "fontSizes"
+      }
+    },
+    "fontWeight": {
+      "normal": {
+        "value": "400",
+        "type": "fontWeights"
+      },
+      "medium": {
+        "value": "500",
+        "type": "fontWeights"
+      },
+      "semibold": {
+        "value": "600",
+        "type": "fontWeights"
+      },
+      "bold": {
+        "value": "700",
+        "type": "fontWeights"
+      }
+    },
+    "lineHeight": {
+      "tight": {
+        "value": "1.25",
+        "type": "lineHeights"
+      },
+      "normal": {
+        "value": "1.5",
+        "type": "lineHeights"
+      },
+      "relaxed": {
+        "value": "1.75",
+        "type": "lineHeights"
+      }
+    },
+    "letterSpacing": {
+      "tight": {
+        "value": "-0.01em",
+        "type": "letterSpacing"
+      },
+      "normal": {
+        "value": "0em",
+        "type": "letterSpacing"
+      },
+      "wide": {
+        "value": "0.01em",
+        "type": "letterSpacing"
       }
     }
   }

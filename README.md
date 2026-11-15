@@ -74,15 +74,17 @@ pnpm dev
 
 Tokens are split into three levels:
 
-1. **Primitive (`core`)** — raw values such as `core.color.gray.1`,
-   `core.space.4`, `core.radius.md`.
-2. **Semantic (`semantic`)** — product decisions such as
+1. **Primitive (`core` set)** — raw values such as `color.gray.1`, `space.4`,
+   `radius.md`, `typography.fontSize.sm`, `shadow.md`.
+2. **Semantic (`semantic` set)** — product decisions such as
    `semantic.color.surface.canvas`, `semantic.color.content.primary`,
    `semantic.color.accent.solid`.
 3. **Component (optional)** — component-specific tokens when a semantic token
    is not enough.
 
-Components must only use semantic tokens.
+Components must only use semantic tokens. The `core` set deliberately does not
+prefix its groups with `core.`; this matches how Tokens Studio exports token
+sets and keeps the Figma → JSON mapping direct.
 
 ### Generated outputs
 
@@ -98,7 +100,10 @@ packages/tokens/dist/
 └── tokens.d.ts     # types
 ```
 
-The CSS variable prefix is `--ds-` to avoid collisions with consumers.
+The CSS variable prefix is `--ds-` to avoid collisions with consumers:
+
+- primitives: `--ds-color-gray-1`, `--ds-space-4`, `--ds-radius-md`
+- semantic: `--ds-semantic-color-surface-canvas`
 
 ### Primitive colors
 
@@ -155,10 +160,11 @@ document.documentElement.dir = "rtl";
    reference. This project uses **Untitled UI Free** as a visual reference only;
    the Figma file is not redistributed.
 2. Install the free **Tokens Studio for Figma** plugin.
-3. Create token sets with these names:
-   - `core` — contains `color`, `space`, `radius`, `typography`, `shadow`
-   - `semantic` — contains `color`
-   - `dark` — optional, only for the Pro multi-file/themes workflow
+3. Create token sets with these names and contents:
+   - `core` — `color`, `space`, `radius`, `typography`, `shadow`
+   - `semantic` — `semantic.color.*` (a top-level `semantic` group)
+   - `themes/dark` — `color.*` overrides and optional `semantic.color.*`
+     overrides
 4. In GitHub, create a **Personal Access Token**:
    - Classic token with the `repo` scope, or
    - Fine-grained token with **Contents: Read and write**.
@@ -175,29 +181,38 @@ document.documentElement.dir = "rtl";
        `packages/tokens/tokens/studio`
    - **Base URL**: leave empty for github.com
 6. Save, then choose **Push** (not Pull) in the sync modal.
+7. (Optional) Import the starter tokens so you begin from the Radix-based
+   scales:
+   - `core` set: import `tokens/core/color.json`, `space.json`, `radius.json`,
+     `typography.json`, `shadow.json`.
+   - `semantic` set: import `tokens/semantic/color.json`.
+   - `themes/dark` set: import `tokens/themes/dark/color.json` and
+     `semantic.json`.
+     Use each set's JSON view to paste/merge the contents, then push again.
 
 The build script auto-detects the storage mode:
 
-| Mode               | Plugin path                                 | Files used by the build                                              |
-| ------------------ | ------------------------------------------- | -------------------------------------------------------------------- |
-| Single file (free) | `packages/tokens/tokens/studio.tokens.json` | that file as the light tokens                                        |
-| Multi-file (Pro)   | `packages/tokens/tokens/studio`             | every JSON file; files with `dark` in the name become dark overrides |
-| Manual fallback    | —                                           | `tokens/core/*`, `tokens/semantic/*`, `tokens/themes/dark/*`         |
+| Mode               | Plugin path                                 | How the build uses it                                                                     |
+| ------------------ | ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Single file (free) | `packages/tokens/tokens/studio.tokens.json` | merges non-dark sets for light; set names containing `dark` (e.g. `themes/dark`) for dark |
+| Multi-file (Pro)   | `packages/tokens/tokens/studio`             | merges non-dark JSON files for light; files containing `dark` in the name for dark        |
+| Manual fallback    | —                                           | `tokens/core/*`, `tokens/semantic/*`, `tokens/themes/dark/*`                              |
 
 The console output confirms the detected mode:
 
 ```text
-Built @repo/tokens (light: studio-file, dark: manual) → ...
+Built @repo/tokens (light: studio-file, dark: studio-file) → ...
 ```
 
-> **Important:** keep the top-level groups `core.*` and `semantic.*` in the
-> Figma sets. The Tailwind mapping and the dark overrides depend on those paths.
-> On the free plan, Tokens Studio merges all sets into one file and can only
-> represent one theme; keep the dark overrides in
-> `packages/tokens/tokens/themes/dark/` (already generated from Radix Colors).
-> Full light/dark theme automation requires the Pro multi-file workflow.
+> **Important:** the Tailwind mapping expects `semantic.color.*` for semantic
+> tokens and `radius.*`, `typography.*`, `shadow.*` for primitives. Keep a set
+> whose name contains `dark` (recommended: `themes/dark`) for the dark
+> overrides. Single-file mode supports light and dark because Tokens Studio
+> stores each set as a top-level key in the file; the build splits them. Pro
+> multi-file sync is still recommended for teams because it is easier to review
+> in git and avoids a large single file.
 
-7. The `Tokens` GitHub Actions workflow validates the build and uploads the
+8. The `Tokens` GitHub Actions workflow validates the build and uploads the
    generated `dist` artifact. `dist` is never committed; it is produced by CI
    and before publishing.
 

@@ -1,5 +1,5 @@
 :root {
-  font-family: var(--ds-core-typography-font-family-sans);
+  font-family: var(--ds-typography-font-family-sans);
   color-scheme: light;
 }
 
@@ -117,7 +117,7 @@ input {
 
 .swatch-color {
   height: 2.5rem;
-  border-radius: var(--ds-core-radius-md);
+  border-radius: var(--ds-radius-md);
   border: 1px solid var(--ds-semantic-color-stroke-subtle);
 }
 
