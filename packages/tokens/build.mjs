@@ -661,6 +661,29 @@ async function loadTokenTree(files) {
   return mergeTokenTrees(contents);
 }
 
+function hasColorFamilies(tokens) {
+  return Object.keys(tokens ?? {}).some((key) => COLOR_FAMILIES.has(key));
+}
+
+function hasSemanticColors(tokens) {
+  return Boolean(tokens?.semantic?.color) && hasTokens(tokens.semantic.color);
+}
+
+function prepareFallback(fallback, figmaTokens) {
+  const base = structuredClone(fallback);
+
+  if (hasColorFamilies(figmaTokens) && hasSemanticColors(figmaTokens)) {
+    delete base.color;
+
+    const overlay = base.semantic?.color?.surface?.overlay;
+
+    base.semantic = base.semantic ?? {};
+    base.semantic.color = overlay ? { surface: { overlay } } : {};
+  }
+
+  return base;
+}
+
 async function resolveLightSources() {
   if (await exists(studioFile)) {
     const { light } = await loadStudioFile();
@@ -820,8 +843,14 @@ async function build() {
     lightSources.tokens ?? (await loadTokenTree(lightSources.sources));
   const figmaDark =
     darkSources.tokens ?? (await loadTokenTree(darkSources.sources));
-  const lightTokens = deepMerge(structuredClone(fallbackLight), figmaLight);
-  const darkTokens = deepMerge(structuredClone(fallbackDark), figmaDark);
+  const lightTokens = deepMerge(
+    prepareFallback(fallbackLight, figmaLight),
+    figmaLight,
+  );
+  const darkTokens = deepMerge(
+    prepareFallback(fallbackDark, figmaDark),
+    figmaDark,
+  );
 
   const light = new StyleDictionary({
     tokens: lightTokens,

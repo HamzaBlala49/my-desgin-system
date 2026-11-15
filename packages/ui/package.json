@@ -65,7 +65,7 @@
     "build": "pnpm run build:js && pnpm run build:css",
     "build:js": "tsup",
     "build:css": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
-    "dev": "concurrently -k \"pnpm run build:js -- --watch\" \"pnpm run build:css -- --watch\"",
+    "dev": "concurrently -k \"pnpm exec tsup --watch\" \"pnpm exec tailwindcss -i ./src/styles.css -o ./dist/styles.css --watch\"",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

@@ -165,6 +165,16 @@ The current Figma file uses the **Plus UI** set structure. The synced file is
 The build does **not** require these sets to be renamed or moved. It reads them
 and normalizes them into the design-system contract.
 
+> **What does `/Mode 1` mean?** It is the default **Figma Variables mode** name,
+> not a theme. Figma variable collections have modes; Tokens Studio exports each
+> collection + mode as a set named `<Collection>/<Mode>`. Plus UI uses a single
+> mode for primitives, brand, typography, border, spacing, opacity, and sizing,
+> so those sets end with `/Mode 1`. The actual themes are the separate
+> `+Theme/Light` and `+Theme/Dark` sets. The build treats `Mode 1` sets as
+> shared; only set names containing `Light` or `Dark` drive theme splitting. If
+> you rename the mode in Figma, the build still works because it normalizes by
+> the set contents, not by the `/Mode 1` suffix.
+
 ### How the build processes the export
 
 `packages/tokens/build.mjs` runs these steps:
@@ -265,6 +275,16 @@ missing, empty, or does not provide a token. To regenerate it:
 pnpm sync:tokens
 pnpm tokens
 ```
+
+When the Figma export provides primitives **and** semantic colors, the build
+drops the fallback color primitives and semantic colors from the output. They do
+not override or duplicate the Plus UI colors. The fallback then supplies only
+the tokens that the Figma export does not provide:
+
+- `semantic.color.surface.overlay`
+- `shadow.xs`
+- `typography.fontFamily.sans` / `typography.fontFamily.mono`
+- `typography.letterSpacing.tight` / `typography.letterSpacing.wide`
 
 The fallback is not the source of truth and is not pushed back to Figma.
 
@@ -495,8 +515,12 @@ changeset bumps `@repo/tokens` and `@repo/ui` to their first minor version.
   it can be filtered later if bundle size becomes a concern.
 - The Plus UI organization is kept as is. There is no need to move tokens into
   `core`/`semantic`; the build adapter handles the mapping.
-- The fallback still provides `surface.overlay`, `shadow.xs`, and a few extra
-  values.
+- The fallback colors are dropped when the Figma export provides colors; the
+  fallback then supplies only `surface.overlay`, `shadow.xs`,
+  `font-sans`/`font-mono`, and `letterSpacing.tight`/`wide`.
+- `dist/tokens.json` no longer contains the old Radix primitive paths such as
+  `color.gray.1`; it contains the Plus UI paths such as `gray.50` and the
+  normalized semantic tokens.
 - The primary accent is now **indigo** (Plus UI brand) instead of the previous
   Radix blue. The component API is unchanged because components use semantic
   tokens.
