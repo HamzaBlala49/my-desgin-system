@@ -1,0 +1,41 @@
+{
+  "radius": {
+    "rounded-none": {
+      "value": 0,
+      "type": "number"
+    },
+    "rounded-sm": {
+      "value": 2,
+      "type": "number"
+    },
+    "rounded": {
+      "value": 4,
+      "type": "number",
+      "description": "default"
+    },
+    "rounded-md": {
+      "value": 6,
+      "type": "number"
+    },
+    "rounded-lg": {
+      "value": 8,
+      "type": "number"
+    },
+    "rounded-xl": {
+      "value": 12,
+      "type": "number"
+    },
+    "rounded-2xl": {
+      "value": 16,
+      "type": "number"
+    },
+    "rounded-3xl": {
+      "value": 24,
+      "type": "number"
+    },
+    "rounded-full": {
+      "value": 9999,
+      "type": "number"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "tokenSetOrder": [
+    "primitives/color-light",
+    "primitives/color-dark",
+    "primitives/typography-en",
+    "primitives/typography-ar",
+    "primitives/space",
+    "primitives/radius",
+    "primitives/border-width",
+    "primitives/shadow",
+    "primitives/opacity",
+    "primitives/sizing",
+    "primitives/breakpoints",
+    "semantic/color-light",
+    "semantic/color-dark",
+    "semantic/border-light",
+    "semantic/border-dark",
+    "semantic/typography-light",
+    "semantic/typography-dark"
+  ]
+}

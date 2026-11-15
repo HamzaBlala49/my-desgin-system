@@ -1,0 +1,13 @@
+{
+  "typography": {
+    "font-family": {
+      "default": {
+        "value": "{font-family.default}",
+        "type": "text",
+        "$extensions": {
+          "com.figma.scopes": ["FONT_FAMILY"]
+        }
+      }
+    }
+  }
+}

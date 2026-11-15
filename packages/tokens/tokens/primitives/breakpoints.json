@@ -1,0 +1,42 @@
+{
+  "sm": {
+    "value": 640,
+    "type": "number",
+    "description": "mobile",
+    "$extensions": {
+      "com.figma.scopes": ["WIDTH_HEIGHT"]
+    }
+  },
+  "md": {
+    "value": 768,
+    "type": "number",
+    "description": "tablet-portrait",
+    "$extensions": {
+      "com.figma.scopes": ["WIDTH_HEIGHT"]
+    }
+  },
+  "lg": {
+    "value": 1024,
+    "type": "number",
+    "description": "tablet-landscape",
+    "$extensions": {
+      "com.figma.scopes": ["WIDTH_HEIGHT"]
+    }
+  },
+  "xl": {
+    "value": 1280,
+    "type": "number",
+    "description": "laptop",
+    "$extensions": {
+      "com.figma.scopes": ["WIDTH_HEIGHT"]
+    }
+  },
+  "2xl": {
+    "value": 1536,
+    "type": "number",
+    "description": "desktop",
+    "$extensions": {
+      "com.figma.scopes": ["WIDTH_HEIGHT"]
+    }
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "font-family": {
+    "default": {
+      "value": "Inter",
+      "type": "text"
+    },
+    "sans": {
+      "value": "\"Inter\", \"IBM Plex Sans Arabic\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "type": "fontFamilies"
+    },
+    "mono": {
+      "value": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, monospace",
+      "type": "fontFamilies"
+    }
+  },
+  "font-weight": {
+    "regular": {
+      "value": "400",
+      "type": "fontWeights",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_WEIGHT"]
+      }
+    },
+    "medium": {
+      "value": "500",
+      "type": "fontWeights",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_WEIGHT"]
+      }
+    },
+    "semi-bold": {
+      "value": "600",
+      "type": "fontWeights",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_WEIGHT"]
+      }
+    },
+    "bold": {
+      "value": "700",
+      "type": "fontWeights",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_WEIGHT"]
+      }
+    }
+  },
+  "font-size": {
+    "xs": {
+      "value": 12,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "sm": {
+      "value": 14,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "md": {
+      "value": 16,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "lg": {
+      "value": 18,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "xl": {
+      "value": 20,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "2xl": {
+      "value": 24,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "3xl": {
+      "value": 30,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "4xl": {
+      "value": 36,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "5xl": {
+      "value": 48,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "6xl": {
+      "value": 60,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "7xl": {
+      "value": 72,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "8xl": {
+      "value": 96,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    },
+    "9xl": {
+      "value": 128,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["FONT_SIZE"]
+      }
+    }
+  },
+  "line-height": {
+    "xs": {
+      "value": 16,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "sm": {
+      "value": 20,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "md": {
+      "value": 24,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "lg": {
+      "value": 28,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "xl": {
+      "value": 28,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "2xl": {
+      "value": 32,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "3xl": {
+      "value": 36,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "4xl": {
+      "value": 40,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "5xl": {
+      "value": 48,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "6xl": {
+      "value": 60,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "7xl": {
+      "value": 72,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "8xl": {
+      "value": 96,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    },
+    "9xl": {
+      "value": 128,
+      "type": "number",
+      "$extensions": {
+        "com.figma.scopes": ["LINE_HEIGHT"]
+      }
+    }
+  },
+  "typography": {
+    "letterSpacing": {
+      "tight": {
+        "value": "-0.01em",
+        "type": "letterSpacing"
+      },
+      "normal": {
+        "value": "0%",
+        "type": "letterSpacing"
+      },
+      "wide": {
+        "value": "0.01em",
+        "type": "letterSpacing"
+      }
+    }
+  }
+}

@@ -1,27 +1,72 @@
 # Design System
 
 A production-ready, token-driven design system monorepo. **Figma is the source
-of truth.** Tokens Studio pushes Figma tokens to GitHub, the build normalizes
-them, compiles CSS variables and a Tailwind v4 theme, and the React components
-consume only semantic tokens.
+of truth.** Tokens Studio writes one JSON file per set into
+`packages/tokens/tokens/`, the build compiles CSS variables and a Tailwind v4
+theme, and the React components consume only semantic tokens.
 
 The design system includes Light and Dark modes, RTL support, accessible Radix
 UI primitives, Storybook documentation, a consumer playground, and automated
 tests.
 
+## The single source of truth
+
+The token source of truth is the structured set files in:
+
+```text
+packages/tokens/tokens/
+├── primitives/
+│   ├── color-light.json
+│   ├── color-dark.json
+│   ├── typography-en.json
+│   ├── typography-ar.json
+│   ├── space.json
+│   ├── radius.json
+│   ├── border-width.json
+│   ├── shadow.json
+│   ├── opacity.json
+│   ├── sizing.json
+│   └── breakpoints.json
+├── semantic/
+│   ├── color-light.json
+│   ├── color-dark.json
+│   ├── border-light.json
+│   ├── border-dark.json
+│   ├── typography-light.json
+│   └── typography-dark.json
+├── component/
+│   ├── button.json
+│   ├── input.json
+│   ├── label.json
+│   ├── checkbox.json
+│   ├── badge.json
+│   ├── card.json
+│   ├── dialog.json
+│   ├── select.json
+│   └── tabs.json
+├── $metadata.json
+├── $themes.json
+└── README.md
+```
+
+These files are written by Tokens Studio folder sync (Pro) or imported
+manually. The build reads this folder first; `studio.tokens.json` and
+`tokens/studio/` are legacy formats that are still supported but are no longer
+the production source.
+
 ## Flow at a glance
 
 ```text
-Figma (Plus UI token sets)
+Figma (primitives/* and semantic/* sets)
   │
-  │  Tokens Studio → Push
+  │  Tokens Studio → Push (folder storage)
   ▼
-GitHub: packages/tokens/tokens/studio.tokens.json
+packages/tokens/tokens/{primitives,semantic}/*.json
   │
   │  pnpm tokens  (packages/tokens/build.mjs)
-  │  1. split sets into shared / light / dark
-  │  2. normalize Plus UI names into the design-system contract
-  │  3. merge the Figma export over a minimal fallback
+  │  1. read the structured set files
+  │  2. merge primitives + the matching light/dark semantics
+  │  3. normalize into the component contract
   ▼
 packages/tokens/dist/
   ├── variables.css    --ds-* variables for :root and [data-theme="dark"]
@@ -48,12 +93,14 @@ Changesets → npm
    scripts.
 2. **Token pipeline** — `@repo/tokens` with Style Dictionary v5 and
    `@tokens-studio/sd-transforms`. Three-tier token architecture
-   (primitive → semantic → component) and a minimal fallback for the few values
-   Figma does not export.
-3. **Figma integration** — Tokens Studio GitHub sync with support for both
-   single-file (free) and multi-file (Pro) token storage.
-4. **Plus UI normalization** — the build understands the Plus UI community set
-   structure, so tokens do not need to be moved into `core`/`semantic` manually.
+   (primitive → semantic → component). Every token, including fonts, tracking,
+   and shadows, comes from the structured source files.
+3. **Structured token source** — one JSON file per set under
+   `tokens/primitives` and `tokens/semantic`, with `$metadata.json` and
+   `$themes.json`. This is the single source of truth.
+4. **Plus UI compatibility** — the build still understands the Plus UI set
+   structure (the migration source) and normalizes it when a legacy
+   `studio.tokens.json` is present.
 5. **Tailwind CSS v4** — CSS-first theme generated from tokens; precompiled
    component CSS; no preflight in the library.
 6. **Core components** — Button, Input, Label, Checkbox, Badge, Card.
@@ -77,10 +124,10 @@ Changesets → npm
 ├── packages/
 │   ├── tokens/                     # @repo/tokens — token pipeline
 │   │   ├── tokens/
-│   │   │   ├── studio.tokens.json  # Figma export — source of truth
-│   │   │   └── fallbacks/          # only values Figma does not export
-│   │   │       ├── typography.json # font-sans/mono + tracking
-│   │   │       └── shadow.json     # shadow.xs
+│   │   │   ├── primitives/         # one file per primitive set
+│   │   │   ├── semantic/           # one file per semantic set
+│   │   │   ├── $metadata.json
+│   │   │   └── $themes.json
 │   │   └── build.mjs               # normalize + Style Dictionary build
 │   ├── ui/                         # @repo/ui — React components
 │   │   ├── src/components/
@@ -114,92 +161,148 @@ pnpm dev
 
 ### Commands
 
-| Command            | Description                                     |
-| ------------------ | ----------------------------------------------- |
-| `pnpm dev`         | Run Storybook, playground, and package watchers |
-| `pnpm build`       | Build tokens, components, docs, and playground  |
-| `pnpm lint`        | Lint all packages                               |
-| `pnpm typecheck`   | Typecheck all packages                          |
-| `pnpm test`        | Run Vitest + Testing Library + jest-axe         |
-| `pnpm tokens`      | Build tokens only                               |
-| `pnpm figma:check` | Generate a sandbox Figma import bundle          |
-| `pnpm changeset`   | Create a changeset                              |
-| `pnpm release`     | Build and publish via Changesets                |
-| `pnpm format`      | Format with Prettier                            |
+| Command          | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| `pnpm dev`       | Run Storybook, playground, and package watchers |
+| `pnpm build`     | Build tokens, components, docs, and playground  |
+| `pnpm lint`      | Lint all packages                               |
+| `pnpm typecheck` | Typecheck all packages                          |
+| `pnpm test`      | Run Vitest + Testing Library + jest-axe         |
+| `pnpm tokens`    | Build tokens only                               |
+| `pnpm changeset` | Create a changeset                              |
+| `pnpm release`   | Build and publish via Changesets                |
+| `pnpm format`    | Format with Prettier                            |
 
-## Token flow in detail
+## Token source in detail
 
-### Source of truth and direction
+### Direction of sync
 
 ```text
 Figma + Tokens Studio  →  Push  →  GitHub  →  pnpm tokens  →  code
 ```
 
 - Tokens are authored in **Figma**.
-- **Push** in Tokens Studio writes the Figma tokens to GitHub.
-- The build consumes the pushed JSON.
-- **Pull** does the opposite (GitHub → Figma) and is only used to bring pushed
-  changes back into Figma.
-- Nothing in this repository pushes tokens from code to Figma.
+- Tokens Studio folder sync **Push** writes one JSON file per set into
+  `packages/tokens/tokens/{primitives,semantic,component}`.
+- The build consumes those files.
+- **Pull** does the opposite (GitHub → Figma) and is used only to load the
+  source files into a Figma file.
+- Nothing in this repository pushes tokens to Figma in the normal flow.
 
-### Current Figma export: Plus UI
+### Set files and token counts
 
-The current Figma file uses the **Plus UI** set structure. The synced file is
-`packages/tokens/tokens/studio.tokens.json` (single-file storage).
+| File                             | Tokens | Purpose                          |
+| -------------------------------- | -----: | -------------------------------- |
+| `primitives/color-light.json`    |    302 | Primitive + brand color scales   |
+| `primitives/color-dark.json`     |    302 | Dark primitive scales            |
+| `primitives/typography-en.json`  |     32 | Latin font, sizes, weights, etc. |
+| `primitives/typography-ar.json`  |      1 | Arabic font family               |
+| `primitives/space.json`          |     35 | Spacing scale                    |
+| `primitives/radius.json`         |      9 | Border radius                    |
+| `primitives/border-width.json`   |      5 | Border widths                    |
+| `primitives/shadow.json`         |      7 | Shadows                          |
+| `primitives/opacity.json`        |     15 | Opacity scale                    |
+| `primitives/sizing.json`         |     35 | Sizing scale                     |
+| `primitives/breakpoints.json`    |      5 | Responsive breakpoints           |
+| `semantic/color-light.json`      |     99 | Light semantic colors            |
+| `semantic/color-dark.json`       |     99 | Dark semantic colors             |
+| `semantic/border-light.json`     |      8 | Light border aliases             |
+| `semantic/border-dark.json`      |      8 | Dark border aliases              |
+| `semantic/typography-light.json` |      1 | Light typography alias           |
+| `semantic/typography-dark.json`  |      1 | Dark typography alias            |
+| `component/button.json`          |     23 | Button colors + radius           |
+| `component/input.json`           |      7 | Input colors + radius            |
+| `component/label.json`           |      2 | Label colors                     |
+| `component/checkbox.json`        |      6 | Checkbox colors + radius         |
+| `component/badge.json`           |     19 | Badge variants + radius          |
+| `component/card.json`            |      5 | Card colors + radius             |
+| `component/dialog.json`          |      8 | Dialog colors + radius           |
+| `component/select.json`          |     11 | Select colors + radius           |
+| `component/tabs.json`            |      7 | Tabs colors + radius             |
 
-| Figma set               | Tokens | Normalized to                                                        |
-| ----------------------- | -----: | -------------------------------------------------------------------- |
-| `global`                |    107 | `shadow.*` + typography fallbacks                                    |
-| `Color/Mode 1`          |    244 | primitive color families (`blue.*`, `gray.*`, `indigo.*`, ...)       |
-| `+Theme/Light`          |    108 | `semantic.color.*` + `border`/`typography` aliases                   |
-| `+Theme/Dark`           |    108 | same paths as Light, dark values                                     |
-| `+Brand/Mode 1`         |     69 | `primary`, `neutral`, `info`, `success`, `warning`, `danger`, `base` |
-| `Typography/Mode 1`     |     31 | `typography.*`                                                       |
-| `Border/Mode 1`         |     14 | `radius.*` + `width.*`                                               |
-| `Spacing/Value`         |     35 | `space.*`                                                            |
-| `Breakpoints/min-width` |      5 | `breakpoint.*`                                                       |
-| `Opacity/Mode 1`        |     15 | `opacity.*`                                                          |
-| `Sizing/Mode 1`         |     35 | `size.*`                                                             |
+`$metadata.json` defines `tokenSetOrder`; `$themes.json` is the Tokens Studio
+theme list (currently empty).
 
-The build does **not** require these sets to be renamed or moved. It reads them
-and normalizes them into the design-system contract.
+### Component tokens
 
-> **What does `/Mode 1` mean?** It is the default **Figma Variables mode** name,
-> not a theme. Figma variable collections have modes; Tokens Studio exports each
-> collection + mode as a set named `<Collection>/<Mode>`. Plus UI uses a single
-> mode for primitives, brand, typography, border, spacing, opacity, and sizing,
-> so those sets end with `/Mode 1`. The actual themes are the separate
-> `+Theme/Light` and `+Theme/Dark` sets. The build treats `Mode 1` sets as
-> shared; only set names containing `Light` or `Dark` drive theme splitting. If
-> you rename the mode in Figma, the build still works because it normalizes by
-> the set contents, not by the `/Mode 1` suffix.
+Component tokens are the third tier. They describe the decisions that are
+specific to one component and are the contract between the design system and the
+component implementation.
 
-### How the build processes the export
+Rules we follow:
+
+1. **Reference semantic tokens, not primitives.** Every component color points
+   to a `semantic.color.*` token, so Light/Dark and future brand themes work
+   automatically. Dimensions may reference core tokens such as `radius.*` until
+   a semantic dimension layer exists.
+2. **Tokenize only what varies.** For each component we define the colors,
+   borders, radius, and variant-specific decisions. We do not tokenize every
+   padding or layout utility; those stay in the component class names.
+3. **One file per component.** `component/<component>.json` keeps ownership clear.
+4. **Use a predictable path.** `component.<component>.<variant>.<property>` for
+   variants, and `component.<component>.<property>` for shared properties.
+5. **Consume tokens in components.** Component tokens are mapped to Tailwind
+   names such as `bg-button-primary-background`, `text-input-foreground`, and
+   `rounded-card`, and the components use those classes instead of the semantic
+   utilities.
+6. **Preview both themes.** Every component token must be checked in Storybook
+   in Light and Dark, and in RTL.
+
+Example:
+
+```json
+{
+  "component": {
+    "button": {
+      "radius": { "value": "{radius.md}", "type": "borderRadius" },
+      "primary": {
+        "background": {
+          "value": "{semantic.color.accent.solid}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.accent.contrast}",
+          "type": "color"
+        }
+      }
+    }
+  }
+}
+```
+
+The build exposes these as CSS variables and Tailwind theme entries:
+
+```css
+--ds-component-button-primary-background
+--color-button-primary-background
+--radius-button
+```
+
+### How the build processes the source
 
 `packages/tokens/build.mjs` runs these steps:
 
-1. **Read the export**
-   - Single file: `tokens/studio.tokens.json`.
-   - Multi-file (Pro): `tokens/studio/`.
-   - If the export is missing or empty, the build warns and uses only the
-     minimal fallback. Colors will be missing until Figma pushes tokens.
+1. **Read the source**
+   - Structured folder (primary): `tokens/primitives` + `tokens/semantic`.
+   - Legacy single file: `tokens/studio.tokens.json`.
+   - Legacy folder: `tokens/studio/`.
+   - If nothing is available, the build fails with a clear error. The structured
+     source files are required.
 
-2. **Split the sets**
-   - A set whose name contains `dark` → dark theme.
-   - A set whose name contains `light` → light theme.
-   - Every other set → shared (primitives, brand scales, typography, radius,
-     spacing, shadows).
-   - The dark build includes the shared sets **and** the dark theme so that
-     aliases such as `{primary.700}`, `{radius.rounded}`, and
-     `{font-family.default}` resolve.
-   - If the export uses the structured `primitives/*` + `semantic/*` layout,
-     the build switches to:
-     - light = `primitives/color-light` + shared primitives +
-       `semantic/*-light`
-     - dark = `primitives/color-dark` + shared primitives +
-       `semantic/*-dark`
-     - shared primitives = `typography-en`, `typography-ar`, `space`, `radius`,
-       `border-width`, `shadow`, `opacity`, `sizing`, `breakpoints`.
+2. **Split primitives and semantics**
+   - Structured folder:
+     - Light = `primitives/color-light` + shared primitives + `semantic/*-light`
+     - Dark = `primitives/color-dark` + shared primitives + `semantic/*-dark`
+     - Shared primitives = `typography-en`, `typography-ar`, `space`, `radius`,
+       `border-width`, `shadow`, `opacity`, `sizing`, `breakpoints`, plus every
+       `component/*` set.
+   - Legacy Plus UI:
+     - A set whose name contains `dark` → dark theme.
+     - A set whose name contains `light` → light theme.
+     - Every other set → shared.
+     - The dark build includes the shared sets and the dark theme so aliases
+       such as `{primary.700}`, `{radius.rounded}`, and
+       `{font-family.default}` resolve.
 
 3. **Normalize the names**
    - Color families are copied as primitives.
@@ -210,12 +313,11 @@ and normalizes them into the design-system contract.
    - Typography groups are mapped to `typography.fontFamily`,
      `typography.fontWeight`, `typography.fontSize`,
      `typography.lineHeight`, and `typography.letterSpacing`.
-   - `Border/Mode 1.radius` is copied and aliased to the Tailwind names
-     (`rounded` → `sm`, `rounded-md` → `md`, ...).
-   - `Spacing/Value`, `Opacity/Mode 1`, `Sizing/Mode 1`, and
-     `Breakpoints/min-width` are mapped to `space.*`, `opacity.*`, `size.*`, and
-     `breakpoint.*`.
-   - `global` `Box Shadow` is mapped to `shadow.*`.
+   - `radius` is copied and aliased to the Tailwind names (`rounded` → `sm`,
+     `rounded-md` → `md`, ...).
+   - `space-*`, `opacity-*`, `size-*`, and breakpoint tokens are mapped to
+     `space.*`, `opacity.*`, `size.*`, and `breakpoint.*`.
+   - `Box Shadow` is mapped to `shadow.*`.
    - Numeric font sizes and line heights are converted to `px`.
    - Composite box shadows are converted to valid CSS strings.
 
@@ -251,38 +353,9 @@ and normalizes them into the design-system contract.
    | `info.*`              | `color.background.info.*` / `color.text.info`       |
    | `focus`               | `color.border.ring`                                 |
 
-5. **Merge with the minimal fallback**
-
-   The Figma export is deep-merged over the minimal fallback, so any missing
-   token keeps its fallback value. The fallback currently supplies only:
-
-   - `shadow.xs`
-   - `typography.fontFamily.sans` / `typography.fontFamily.mono`
-   - `typography.letterSpacing.tight` / `typography.letterSpacing.wide`
-
-   All colors, spacing, radius, font sizes, font weights, line heights, and the
-   remaining shadows come from Figma.
-
-6. **Build CSS and JS**
+5. **Build CSS and JS**
 
    Style Dictionary produces the files described below.
-
-### Minimal fallback
-
-The fallback lives in:
-
-```text
-packages/tokens/tokens/
-└── fallbacks/
-    ├── typography.json   # font-sans/mono + tracking
-    └── shadow.json       # shadow.xs
-```
-
-It only fills values that the Figma export does not provide. The Figma export
-always wins for any token path it defines. There are no fallback colors anymore;
-the old Radix-based `core/semantic/themes` fallback files were removed.
-
-The fallback is not the source of truth and is not pushed back to Figma.
 
 ### Generated outputs
 
@@ -302,17 +375,16 @@ CSS variable contract:
 - Semantic: `--ds-semantic-color-surface-canvas`,
   `--ds-semantic-color-accent-solid`.
 - The build also emits `--ds-color-*`, `--ds-border-*`, `--ds-typography-*`,
-  `--ds-opacity-*`, `--ds-size-*`, and `--ds-breakpoint-*` for every exported
-  token.
+  `--ds-opacity-*`, `--ds-size-*`, and `--ds-breakpoint-*`.
 
 ### Current build result
 
 ```text
-Built @repo/tokens (light: studio-file, dark: studio-file)
-→ 49 semantic colors, 18 radii, 39 typography tokens, 8 shadows
+Built @repo/tokens (light: tokens-folder, dark: tokens-folder)
+→ 49 semantic colors, 18 radii, 37 typography tokens, 8 shadows
 ```
 
-Resolved values from the current Plus UI export:
+Resolved values from the current source:
 
 | Token             | Light     | Dark      |
 | ----------------- | --------- | --------- |
@@ -326,83 +398,35 @@ Resolved values from the current Plus UI export:
 
 ## Figma + Tokens Studio setup
 
-1. Create a Figma file and use the **Plus UI** community token structure (or any
-   structure listed above).
-2. Install **Tokens Studio for Figma**.
-3. In GitHub, create a **Personal Access Token**:
+The source files are already in `packages/tokens/tokens/`. To connect Figma:
+
+1. In Figma, create the sets `primitives/*` and `semantic/*` (or load the
+   existing source files with a Pull, see below).
+2. In GitHub, create a **Personal Access Token**:
    - Classic token with the `repo` scope, or
    - Fine-grained token with **Contents: Read and write**.
-4. In Figma, open **Tokens Studio → Settings → Sync providers → Add new →
+3. In Figma, open **Tokens Studio → Settings → Sync providers → Add new →
    GitHub** and fill the form:
    - **Name**: `design-system-tokens`
-   - **Personal access token**: the token from step 3
+   - **Personal access token**: the token from step 2
    - **Repository (owner/repo)**: `your-user/my-desgin-system`
    - **Branch**: `main` (or a feature branch)
    - **Token storage location (file/folder path)**:
-     - **Free plan (single file)**:
-       `packages/tokens/tokens/studio.tokens.json`
-     - **Pro plan (multi-file)**:
-       `packages/tokens/tokens/studio`
+     - **Folder (recommended)**: `packages/tokens/tokens`
+     - **Single file (legacy)**: `packages/tokens/tokens/studio.tokens.json`
    - **Base URL**: leave empty for github.com
-5. Define or edit tokens in Figma, then choose **Push** in the sync modal.
-6. The `Tokens` GitHub Actions workflow validates the build and uploads the
-   generated `dist` artifact.
+4. Save, then use **Pull** to load the existing source files into Figma.
+   Tokens Studio creates one set per file.
+5. After the initial load, use **Push** for Figma → GitHub changes.
 
-> **Do not edit `studio.tokens.json` by hand.** It is written by Tokens Studio.
-> The only hand-maintained token files are the minimal fallbacks under
-> `tokens/fallbacks/`.
+> **Direction of sync:** In the normal workflow, Tokens Studio **Push** writes
+> the Figma tokens to GitHub, and the build consumes them. **Pull** is used
+> only to load the existing source files into Figma.
 
-### One-time migration: write the structured sets to Figma
-
-The target Figma structure is:
-
-```text
-primitives/
-  color-light.json
-  color-dark.json
-  typography-en.json
-  typography-ar.json
-  space.json
-  radius.json
-  border-width.json
-  shadow.json
-  opacity.json
-  sizing.json
-  breakpoints.json
-semantic/
-  color-light.json
-  color-dark.json
-  border-light.json
-  border-dark.json
-  typography-light.json
-  typography-dark.json
-```
-
-Generate the import bundle:
-
-```bash
-pnpm figma:check
-```
-
-This writes `packages/tokens/figma-check/figma-check.tokens.json` plus the same
-structure as individual files. The `figma-check/` folder is gitignored.
-
-Migration steps:
-
-1. Import `figma-check.tokens.json` into a **new sandbox Figma file** first and
-   verify the sets.
-2. If correct, import it into the production Figma file **once** to replace the
-   Plus UI sets.
-3. Push from Tokens Studio to GitHub. The build detects `primitives/*` and
-   `semantic/*` automatically:
-   - Light: `primitives/color-light` + shared primitives + `semantic/*-light`
-   - Dark: `primitives/color-dark` + shared primitives + `semantic/*-dark`
-4. After this one-time migration, the flow is **Figma → GitHub → code**. Do not
-   run `figma:check` again for production.
-
-> `primitives/color-dark` currently contains the same primitive scales as light
-> because Plus UI primitives are mode-independent. You can replace it with a
-> real dark primitive palette later; the build will use it automatically.
+> **Free plan:** Folder sync is a Pro feature. On the free plan, the source
+> files can still be used by the build, but Figma cannot write them as separate
+> files. You would need to create the sets manually and import each JSON file,
+> or use the legacy single-file mode.
 
 ## Tailwind v4 integration
 
@@ -556,34 +580,38 @@ changeset bumps `@repo/tokens` and `@repo/ui` to their first minor version.
 
 ## Current status and notes
 
-- The Figma export is active: `light: studio-file, dark: studio-file`.
-- The export contains 11 sets and is about 132 KB.
-- The build emits all exported primitives, brand scales, spacing, sizing,
-  opacity, and breakpoints, so `variables.css` is about 54 KB. This is expected;
-  it can be filtered later if bundle size becomes a concern.
-- The Plus UI organization is kept as is. There is no need to move tokens into
-  `core`/`semantic`; the build adapter handles the mapping.
-- There are **no fallback colors** anymore. The old Radix-based
-  `core/semantic/themes` fallback files were removed. The minimal fallback
-  supplies only `shadow.xs`, `font-sans`/`font-mono`, and
-  `letterSpacing.tight`/`wide`.
-- `dist/tokens.json` contains the Plus UI primitive paths such as `gray.50` and
-  the normalized semantic tokens. It no longer contains `color.gray.1`.
-- The primary accent is **indigo** (Plus UI brand). The component API is
-  unchanged because components use semantic tokens.
+- The active source is the structured folder: `light: tokens-folder,
+dark: tokens-folder`.
+- The source contains 26 set files (11 primitives, 6 semantic, 9 component)
+  plus `$metadata.json` and `$themes.json`.
+- The build output is 49 semantic colors, 18 radii, 37 typography tokens,
+  8 shadows, and component tokens for 9 components.
+- There is **no fallback layer**. Every token, including `shadow-xs`,
+  `font-sans`, `font-mono`, `tracking-tight`, and `tracking-wide`, comes from the
+  structured source files.
+- The primary accent is **indigo** (`#4338ca` light / `#a5b4fc` dark).
+- `primitives/color-dark` currently mirrors `color-light` because the primitive
+  palette is mode-independent. Replace it with a real dark palette when needed;
+  the build will use it automatically.
+- The legacy `studio.tokens.json` and Plus UI structure are still supported by
+  the build for backward compatibility, but they are not the production source.
 
 ### Possible next steps
 
-1. Filter `variables.css` to emit only semantic and used tokens.
-2. Add component-level tokens for multi-brand support.
-3. Add more components (Dropdown, Tooltip, Switch, Toast).
-4. Add visual regression testing (Chromatic or Playwright screenshots).
-5. Connect the Figma MCP server for design-to-code workflows.
-6. Use `FIGMA_AI_PROMPT.md` to generate or extend the Figma design system.
+1. Add a real dark primitive palette in `primitives/color-dark.json`.
+2. Expand `primitives/typography-ar.json` with Arabic-specific sizes and line
+   heights.
+3. Filter `variables.css` to emit only semantic and used tokens.
+4. Add component-level tokens for multi-brand support.
+5. Add more components (Dropdown, Tooltip, Switch, Toast).
+6. Add visual regression testing (Chromatic or Playwright screenshots).
+7. Connect the Figma MCP server for design-to-code workflows.
+8. Use `FIGMA_AI_PROMPT.md` to generate or extend the Figma design system.
 
 ## Attribution and licenses
 
 - **Radix UI** (MIT) — accessible component primitives.
-- **Plus UI** community token structure — current Figma token source. Verify the
-  Figma file's license before redistributing its assets.
+- **Plus UI** community token structure — the migration source for the current
+  token values. Verify the Figma file's license before redistributing its
+  assets.
 - This project does **not** use shadcn/ui tokens, naming, or configuration.

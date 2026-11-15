@@ -1,0 +1,20 @@
+{
+  "component": {
+    "card": {
+      "radius": { "value": "{radius.lg}", "type": "borderRadius" },
+      "background": {
+        "value": "{semantic.color.surface.raised}",
+        "type": "color"
+      },
+      "foreground": {
+        "value": "{semantic.color.content.primary}",
+        "type": "color"
+      },
+      "description": {
+        "value": "{semantic.color.content.secondary}",
+        "type": "color"
+      },
+      "border": { "value": "{semantic.color.stroke.subtle}", "type": "color" }
+    }
+  }
+}

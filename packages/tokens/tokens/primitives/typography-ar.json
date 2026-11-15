@@ -1,0 +1,10 @@
+{
+  "typography": {
+    "fontFamily": {
+      "arabic": {
+        "value": "IBM Plex Sans Arabic",
+        "type": "fontFamilies"
+      }
+    }
+  }
+}

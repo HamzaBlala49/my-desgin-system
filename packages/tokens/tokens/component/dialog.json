@@ -1,0 +1,26 @@
+{
+  "component": {
+    "dialog": {
+      "radius": { "value": "{radius.lg}", "type": "borderRadius" },
+      "overlay": {
+        "value": "{semantic.color.surface.overlay}",
+        "type": "color"
+      },
+      "background": {
+        "value": "{semantic.color.surface.raised}",
+        "type": "color"
+      },
+      "foreground": {
+        "value": "{semantic.color.content.primary}",
+        "type": "color"
+      },
+      "border": { "value": "{semantic.color.stroke.subtle}", "type": "color" },
+      "title": { "value": "{semantic.color.content.primary}", "type": "color" },
+      "description": {
+        "value": "{semantic.color.content.secondary}",
+        "type": "color"
+      },
+      "focus-ring": { "value": "{semantic.color.focus}", "type": "color" }
+    }
+  }
+}

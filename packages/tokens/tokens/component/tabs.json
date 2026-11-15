@@ -1,0 +1,27 @@
+{
+  "component": {
+    "tabs": {
+      "radius": { "value": "{radius.md}", "type": "borderRadius" },
+      "trigger": {
+        "radius": { "value": "{radius.sm}", "type": "borderRadius" }
+      },
+      "list-background": {
+        "value": "{semantic.color.surface.subtle}",
+        "type": "color"
+      },
+      "trigger-foreground": {
+        "value": "{semantic.color.content.secondary}",
+        "type": "color"
+      },
+      "active-background": {
+        "value": "{semantic.color.surface.raised}",
+        "type": "color"
+      },
+      "active-foreground": {
+        "value": "{semantic.color.content.primary}",
+        "type": "color"
+      },
+      "focus-ring": { "value": "{semantic.color.focus}", "type": "color" }
+    }
+  }
+}

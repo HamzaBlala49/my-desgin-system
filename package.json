@@ -7,7 +7,6 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "tokens": "pnpm --filter @repo/tokens build",
-    "figma:check": "pnpm --filter @repo/tokens figma:check",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md,css,json}\"",
     "changeset": "changeset",

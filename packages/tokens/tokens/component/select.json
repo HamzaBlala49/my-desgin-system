@@ -1,0 +1,43 @@
+{
+  "component": {
+    "select": {
+      "radius": { "value": "{radius.md}", "type": "borderRadius" },
+      "item": {
+        "radius": { "value": "{radius.sm}", "type": "borderRadius" }
+      },
+      "trigger-background": {
+        "value": "{semantic.color.surface.canvas}",
+        "type": "color"
+      },
+      "trigger-foreground": {
+        "value": "{semantic.color.content.primary}",
+        "type": "color"
+      },
+      "trigger-border": {
+        "value": "{semantic.color.stroke.default}",
+        "type": "color"
+      },
+      "placeholder": {
+        "value": "{semantic.color.content.secondary}",
+        "type": "color"
+      },
+      "content-background": {
+        "value": "{semantic.color.surface.raised}",
+        "type": "color"
+      },
+      "content-foreground": {
+        "value": "{semantic.color.content.primary}",
+        "type": "color"
+      },
+      "content-border": {
+        "value": "{semantic.color.stroke.subtle}",
+        "type": "color"
+      },
+      "item-hover": {
+        "value": "{semantic.color.surface.subtle}",
+        "type": "color"
+      },
+      "focus-ring": { "value": "{semantic.color.focus}", "type": "color" }
+    }
+  }
+}

@@ -1,34 +1,33 @@
-# Token sources
+# Token source
 
-The direction of sync is **Figma → GitHub → code**. Figma is the source of
-truth.
+This folder is the single source of truth for the design-system tokens. The
+direction of sync is **Figma → GitHub → code**.
 
-## Figma export (source of truth)
+## Sets
 
-- `studio.tokens.json` — single-file export used by the free Tokens Studio plan.
-- `studio/` — multi-file export used by the Pro plan.
+- `primitives/*.json` — one file per primitive set:
+  `color-light`, `color-dark`, `typography-en`, `typography-ar`, `space`,
+  `radius`, `border-width`, `shadow`, `opacity`, `sizing`, `breakpoints`.
+- `semantic/*.json` — one file per semantic set:
+  `color-light`, `color-dark`, `border-light`, `border-dark`,
+  `typography-light`, `typography-dark`.
+- `component/*.json` — one file per component:
+  `button`, `input`, `label`, `checkbox`, `badge`, `card`, `dialog`, `select`,
+  `tabs`.
+- `$metadata.json` — Tokens Studio set order.
+- `$themes.json` — Tokens Studio themes (currently empty).
 
-These files are written by Tokens Studio when you press **Push**. Do not edit
-them by hand.
-
-## Minimal fallback
-
-- `fallbacks/typography.json` — `font-sans`/`font-mono` and
-  `letterSpacing.tight`/`wide`
-- `fallbacks/shadow.json` — `shadow.xs`
-
-Colors, spacing, radius, typography sizes/weights/line-heights, and shadows come
-from the Figma export. The fallback files only fill values that the Figma export
-does not provide. The Figma export always wins for any path it defines. The
-fallback is **not** pushed back to Figma.
+Each JSON file is one Tokens Studio set. The files are written by Tokens Studio
+folder sync (Pro) or imported manually. Do not move them into a single file;
+the build reads them as separate sets.
 
 ## Flow
 
 ```text
 Figma + Tokens Studio
-        │ Push
+        │ Push (folder storage)
         ▼
-packages/tokens/tokens/studio.tokens.json  (or studio/)
+packages/tokens/tokens/{primitives,semantic}/*.json
         │ pnpm tokens
         ▼
 packages/tokens/dist/

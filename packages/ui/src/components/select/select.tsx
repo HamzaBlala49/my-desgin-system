@@ -13,10 +13,10 @@ const SelectTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     className={cn(
-      "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-stroke-default bg-surface-canvas px-3 py-2 text-sm text-content-primary shadow-xs",
-      "focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-canvas focus-visible:outline-none",
+      "flex h-10 w-full items-center justify-between gap-2 rounded-select border border-select-trigger-border bg-select-trigger-background px-3 py-2 text-sm text-select-trigger-foreground shadow-xs",
+      "focus-visible:ring-2 focus-visible:ring-select-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-canvas focus-visible:outline-none",
       "disabled:cursor-not-allowed disabled:opacity-50",
-      "data-[placeholder]:text-content-secondary",
+      "data-[placeholder]:text-select-placeholder",
       "[&>span]:line-clamp-1",
       className,
     )}
@@ -37,7 +37,7 @@ const SelectScrollUpButton = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.ScrollUpButton
     className={cn(
-      "flex cursor-default items-center justify-center py-1 text-content-secondary",
+      "flex cursor-default items-center justify-center py-1 text-select-placeholder",
       className,
     )}
     ref={ref}
@@ -54,7 +54,7 @@ const SelectScrollDownButton = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.ScrollDownButton
     className={cn(
-      "flex cursor-default items-center justify-center py-1 text-content-secondary",
+      "flex cursor-default items-center justify-center py-1 text-select-placeholder",
       className,
     )}
     ref={ref}
@@ -73,7 +73,7 @@ const SelectContent = React.forwardRef<
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       className={cn(
-        "relative z-50 max-h-96 min-w-32 overflow-hidden rounded-md border border-stroke-subtle bg-surface-raised text-content-primary shadow-md",
+        "relative z-50 max-h-96 min-w-32 overflow-hidden rounded-select border border-select-content-border bg-select-content-background text-select-content-foreground shadow-md",
         className,
       )}
       position={position}
@@ -102,7 +102,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     className={cn(
-      "px-2 py-1.5 text-xs font-medium text-content-secondary",
+      "px-2 py-1.5 text-xs font-medium text-select-placeholder",
       className,
     )}
     ref={ref}
@@ -117,8 +117,8 @@ const SelectItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     className={cn(
-      "relative flex w-full cursor-default items-center rounded-sm py-1.5 ps-2 pe-8 text-sm outline-none select-none",
-      "focus:bg-surface-subtle",
+      "relative flex w-full cursor-default items-center rounded-select-item py-1.5 ps-2 pe-8 text-sm outline-none select-none",
+      "focus:bg-select-item-hover",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
@@ -127,7 +127,10 @@ const SelectItem = React.forwardRef<
   >
     <span className="absolute end-2 flex size-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check aria-hidden="true" className="size-4 text-accent-text" />
+        <Check
+          aria-hidden="true"
+          className="size-4 text-select-trigger-foreground"
+        />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -140,7 +143,7 @@ const SelectSeparator = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
-    className={cn("-mx-1 my-1 h-px bg-stroke-subtle", className)}
+    className={cn("-mx-1 my-1 h-px bg-select-content-border", className)}
     ref={ref}
     {...props}
   />

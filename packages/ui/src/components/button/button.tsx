@@ -6,9 +6,9 @@ import { cn } from "../../lib/cn";
 
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 rounded-md whitespace-nowrap",
+    "inline-flex items-center justify-center gap-2 rounded-button whitespace-nowrap",
     "text-sm font-medium transition-colors",
-    "focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none",
+    "focus-visible:ring-2 focus-visible:ring-button-focus-ring focus-visible:outline-none",
     "focus-visible:ring-offset-2 focus-visible:ring-offset-surface-canvas",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -16,14 +16,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-accent text-accent-contrast hover:bg-accent-hover",
+        primary:
+          "border border-button-primary-border bg-button-primary-background text-button-primary-foreground hover:bg-button-primary-background-hover",
         secondary:
-          "border border-stroke-default bg-surface-raised text-content-primary hover:bg-surface-hover",
+          "border border-button-secondary-border bg-button-secondary-background text-button-secondary-foreground hover:bg-button-secondary-background-hover",
         outline:
-          "border border-stroke-default bg-transparent text-content-primary hover:bg-surface-subtle",
-        ghost: "bg-transparent text-content-primary hover:bg-surface-subtle",
-        destructive: "bg-danger text-danger-contrast hover:bg-danger-hover",
-        link: "bg-transparent text-accent-text underline-offset-4 hover:underline",
+          "border border-button-outline-border bg-button-outline-background text-button-outline-foreground hover:bg-button-outline-background-hover",
+        ghost:
+          "border border-button-ghost-border bg-button-ghost-background text-button-ghost-foreground hover:bg-button-ghost-background-hover",
+        destructive:
+          "border border-button-destructive-border bg-button-destructive-background text-button-destructive-foreground hover:bg-button-destructive-background-hover",
+        link: "bg-transparent text-button-link-foreground underline-offset-4 hover:underline",
       },
       size: {
         sm: "h-8 px-3 text-xs",

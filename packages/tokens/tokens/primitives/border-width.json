@@ -1,0 +1,30 @@
+{
+  "width": {
+    "border-0": {
+      "value": 0,
+      "type": "number"
+    },
+    "border-1": {
+      "value": 1,
+      "type": "number"
+    },
+    "border-2": {
+      "value": 2,
+      "type": "number",
+      "description": "default",
+      "$extensions": {
+        "com.figma.codeSyntax": {
+          "Web": "Width/border-2"
+        }
+      }
+    },
+    "border-4": {
+      "value": 4,
+      "type": "number"
+    },
+    "border-8": {
+      "value": 8,
+      "type": "number"
+    }
+  }
+}

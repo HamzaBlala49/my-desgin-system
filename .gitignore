@@ -18,5 +18,3 @@ storybook-static/
 # tsup watch mode bundles the config
 *.bundled_*.mjs
 
-# generated Figma check bundle
-packages/tokens/figma-check/

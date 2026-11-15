@@ -1,0 +1,11 @@
+{
+  "component": {
+    "label": {
+      "foreground": {
+        "value": "{semantic.color.content.primary}",
+        "type": "color"
+      },
+      "required": { "value": "{semantic.color.danger.text}", "type": "color" }
+    }
+  }
+}

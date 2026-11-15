@@ -14,7 +14,7 @@ const Label = React.forwardRef<
 >(({ className, children, required = false, ...props }, ref) => (
   <LabelPrimitive.Root
     className={cn(
-      "text-sm leading-none font-medium text-content-primary",
+      "text-sm leading-none font-medium text-label-foreground",
       "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
       className,
     )}
@@ -23,7 +23,7 @@ const Label = React.forwardRef<
   >
     {children}
     {required ? (
-      <span aria-hidden="true" className="ms-1 text-danger-text">
+      <span aria-hidden="true" className="ms-1 text-label-required">
         *
       </span>
     ) : null}

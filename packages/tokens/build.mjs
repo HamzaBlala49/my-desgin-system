@@ -8,7 +8,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { watch } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import StyleDictionary from "style-dictionary";
 import { register } from "@tokens-studio/sd-transforms";
@@ -18,12 +18,9 @@ const root = __dirname;
 const tokensRoot = resolve(root, "tokens");
 const studioFile = resolve(tokensRoot, "studio.tokens.json");
 const studioFolder = resolve(tokensRoot, "studio");
-const fallbackLightFiles = [
-  resolve(tokensRoot, "fallbacks/typography.json"),
-  resolve(tokensRoot, "fallbacks/shadow.json"),
-];
-const fallbackDarkFiles = [];
-
+const primitivesDir = resolve(tokensRoot, "primitives");
+const semanticDir = resolve(tokensRoot, "semantic");
+const componentDir = resolve(tokensRoot, "component");
 register(StyleDictionary);
 
 function shadowUnit(value) {
@@ -117,6 +114,22 @@ function hasTokens(node) {
 
 async function readJson(filePath) {
   return JSON.parse(await readFile(filePath, "utf8"));
+}
+
+function collectTypedTokens(node, path = [], out = []) {
+  for (const [key, value] of Object.entries(node)) {
+    const next = [...path, key];
+
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      if ("value" in value || "$value" in value) {
+        out.push({ path: next, type: value.type ?? value.$type });
+      } else {
+        collectTypedTokens(value, next, out);
+      }
+    }
+  }
+
+  return out;
 }
 
 function collectPaths(node, path = [], out = []) {
@@ -266,6 +279,7 @@ const FONT_WEIGHT_KEY_NAMES = {
 };
 
 const SHADOW_NAMES = {
+  "shadow-xs": "xs",
   "shadow-sm": "sm",
   shadow: "base",
   "shadow-md": "md",
@@ -636,6 +650,7 @@ function loadStructuredStudioFile(sets, $themes) {
     "primitives/opacity",
     "primitives/sizing",
     "primitives/breakpoints",
+    ...Object.keys(sets).filter((name) => name.startsWith("component/")),
   ];
   const shared = mergeTokenTrees(
     sharedNames
@@ -678,6 +693,39 @@ function loadStructuredStudioFile(sets, $themes) {
     ]),
     themes: $themes ?? [],
   };
+}
+
+async function hasStructuredFolder() {
+  const hasPrimitives = await exists(primitivesDir);
+  const hasSemantics = await exists(semanticDir);
+
+  return hasPrimitives || hasSemantics;
+}
+
+async function readStructuredSets() {
+  const files = [
+    ...(await listJsonFiles(primitivesDir)),
+    ...(await listJsonFiles(semanticDir)),
+    ...(await listJsonFiles(componentDir)),
+  ];
+  const sets = {};
+
+  await Promise.all(
+    files.map(async (file) => {
+      const name = relative(tokensRoot, file)
+        .replace(/\.json$/, "")
+        .split(sep)
+        .join("/");
+
+      sets[name] = await readJson(file);
+    }),
+  );
+
+  const themes = (await exists(resolve(tokensRoot, "$themes.json")))
+    ? await readJson(resolve(tokensRoot, "$themes.json"))
+    : [];
+
+  return loadStructuredStudioFile(sets, themes);
 }
 
 async function loadStudioFile() {
@@ -726,30 +774,15 @@ async function loadTokenTree(files) {
   return mergeTokenTrees(contents);
 }
 
-function hasColorFamilies(tokens) {
-  return Object.keys(tokens ?? {}).some((key) => COLOR_FAMILIES.has(key));
-}
+async function resolveLightSources() {
+  if (await hasStructuredFolder()) {
+    const { light } = await readStructuredSets();
 
-function hasSemanticColors(tokens) {
-  return Boolean(tokens?.semantic?.color) && hasTokens(tokens.semantic.color);
-}
-
-function prepareFallback(fallback, figmaTokens) {
-  const base = structuredClone(fallback);
-
-  if (hasColorFamilies(figmaTokens) && hasSemanticColors(figmaTokens)) {
-    delete base.color;
-
-    const overlay = base.semantic?.color?.surface?.overlay;
-
-    base.semantic = base.semantic ?? {};
-    base.semantic.color = overlay ? { surface: { overlay } } : {};
+    if (hasTokens(light)) {
+      return { mode: "tokens-folder", tokens: light };
+    }
   }
 
-  return base;
-}
-
-async function resolveLightSources() {
   if (await exists(studioFile)) {
     const { light } = await loadStudioFile();
 
@@ -780,13 +813,20 @@ async function resolveLightSources() {
     );
   }
 
-  return {
-    mode: "manual",
-    sources: fallbackLightFiles,
-  };
+  throw new Error(
+    "No token source found. Expected tokens/primitives and tokens/semantic.",
+  );
 }
 
 async function resolveDarkSources() {
+  if (await hasStructuredFolder()) {
+    const { dark } = await readStructuredSets();
+
+    if (hasTokens(dark)) {
+      return { mode: "tokens-folder", tokens: dark };
+    }
+  }
+
   if (await exists(studioFile)) {
     const { dark } = await loadStudioFile();
 
@@ -808,8 +848,8 @@ async function resolveDarkSources() {
   }
 
   return {
-    mode: "manual",
-    sources: fallbackDarkFiles,
+    mode: "same-as-light",
+    tokens: {},
   };
 }
 
@@ -827,7 +867,14 @@ function tailwindColorName(path) {
   return path.join("-");
 }
 
-function buildTailwindTheme({ semanticColors, radius, typography, shadow }) {
+function buildTailwindTheme({
+  semanticColors,
+  radius,
+  typography,
+  shadow,
+  componentColors,
+  componentRadii,
+}) {
   const lines = [];
 
   lines.push("  /* Colors */");
@@ -892,6 +939,32 @@ function buildTailwindTheme({ semanticColors, radius, typography, shadow }) {
     lines.push(`  --shadow-${name}: var(--ds-shadow-${name});`);
   }
 
+  lines.push("");
+  lines.push("  /* Component colors */");
+
+  for (const path of componentColors) {
+    const name = path.slice(1).join("-");
+
+    lines.push(`  --color-${name}: var(--ds-component-${name});`);
+  }
+
+  lines.push("");
+  lines.push("  /* Component radius */");
+
+  for (const path of componentRadii) {
+    const nameParts = path.slice(1);
+
+    if (nameParts[nameParts.length - 1] === "radius") {
+      nameParts.pop();
+    }
+
+    const name = nameParts.join("-");
+
+    lines.push(
+      `  --radius-${name}: var(--ds-component-${path.slice(1).join("-")});`,
+    );
+  }
+
   return `/**\n * Auto-generated by @repo/tokens. Do not edit directly.\n */\n@import "./variables.css";\n\n@theme {\n  --color-*: initial;\n}\n\n@theme inline {\n${lines.join(
     "\n",
   )}\n}\n`;
@@ -902,20 +975,14 @@ async function build() {
   const tempDir = await mkdtemp(join(root, "dist/.tmp-"));
   const lightSources = await resolveLightSources();
   const darkSources = await resolveDarkSources();
-  const fallbackLight = await loadTokenTree(fallbackLightFiles);
-  const fallbackDark = await loadTokenTree(fallbackDarkFiles);
-  const figmaLight =
-    lightSources.tokens ?? (await loadTokenTree(lightSources.sources));
-  const figmaDark =
+  const lightTokens = structuredClone(
+    lightSources.tokens ?? (await loadTokenTree(lightSources.sources)),
+  );
+  const darkSource =
     darkSources.tokens ?? (await loadTokenTree(darkSources.sources));
-  const lightTokens = deepMerge(
-    prepareFallback(fallbackLight, figmaLight),
-    figmaLight,
-  );
-  const darkTokens = deepMerge(
-    prepareFallback(fallbackDark, figmaDark),
-    figmaDark,
-  );
+  const darkTokens = hasTokens(darkSource)
+    ? structuredClone(darkSource)
+    : structuredClone(lightTokens);
 
   const light = new StyleDictionary({
     tokens: lightTokens,
@@ -985,6 +1052,26 @@ async function build() {
   await writeFile(resolve(root, "dist/variables.css"), variablesCss, "utf8");
 
   const lightPaths = collectPaths(lightTokens);
+  const lightTypedTokens = collectTypedTokens(lightTokens);
+  const componentColors = lightTypedTokens
+    .filter(({ path, type }) => path[0] === "component" && type === "color")
+    .map(({ path }) => path);
+  const componentRadii = lightTypedTokens
+    .filter(({ path, type }) => {
+      if (path[0] !== "component") {
+        return false;
+      }
+
+      const name = path[path.length - 1];
+
+      return (
+        type === "borderRadius" ||
+        type === "dimension" ||
+        name === "radius" ||
+        name.endsWith("-radius")
+      );
+    })
+    .map(({ path }) => path);
 
   const semanticColors = lightPaths
     .filter((path) => path[0] === "semantic" && path[1] === "color")
@@ -1016,6 +1103,8 @@ async function build() {
     radius,
     typography,
     shadow,
+    componentColors,
+    componentRadii,
   });
 
   await writeFile(resolve(root, "dist/tailwind.css"), tailwindCss, "utf8");

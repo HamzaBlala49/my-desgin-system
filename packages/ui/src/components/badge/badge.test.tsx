@@ -13,7 +13,9 @@ describe("Badge", () => {
   it("applies variant classes", () => {
     render(<Badge variant="success">Active</Badge>);
 
-    expect(screen.getByText("Active")).toHaveClass("bg-success");
+    expect(screen.getByText("Active")).toHaveClass(
+      "bg-badge-success-background",
+    );
   });
 
   it("has no accessibility violations", async () => {

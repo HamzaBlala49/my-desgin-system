@@ -1,0 +1,73 @@
+{
+  "component": {
+    "badge": {
+      "radius": { "value": "{radius.full}", "type": "borderRadius" },
+      "neutral": {
+        "background": {
+          "value": "{semantic.color.surface.subtle}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.content.secondary}",
+          "type": "color"
+        },
+        "border": { "value": "{semantic.color.stroke.subtle}", "type": "color" }
+      },
+      "primary": {
+        "background": {
+          "value": "{semantic.color.accent.solid}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.accent.contrast}",
+          "type": "color"
+        },
+        "border": { "value": "transparent", "type": "color" }
+      },
+      "success": {
+        "background": {
+          "value": "{semantic.color.success.solid}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.success.contrast}",
+          "type": "color"
+        },
+        "border": { "value": "transparent", "type": "color" }
+      },
+      "warning": {
+        "background": {
+          "value": "{semantic.color.warning.solid}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.warning.contrast}",
+          "type": "color"
+        },
+        "border": { "value": "transparent", "type": "color" }
+      },
+      "danger": {
+        "background": {
+          "value": "{semantic.color.danger.solid}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.danger.contrast}",
+          "type": "color"
+        },
+        "border": { "value": "transparent", "type": "color" }
+      },
+      "outline": {
+        "background": { "value": "transparent", "type": "color" },
+        "foreground": {
+          "value": "{semantic.color.content.primary}",
+          "type": "color"
+        },
+        "border": {
+          "value": "{semantic.color.stroke.default}",
+          "type": "color"
+        }
+      }
+    }
+  }
+}

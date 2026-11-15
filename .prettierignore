@@ -8,5 +8,3 @@ pnpm-lock.yaml
 packages/tokens/tokens/studio
 packages/tokens/tokens/studio.tokens.json
 
-# generated Figma check bundle
-packages/tokens/figma-check/

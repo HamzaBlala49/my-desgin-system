@@ -23,7 +23,6 @@
   "scripts": {
     "build": "node ./build.mjs",
     "dev": "node ./build.mjs --watch",
-    "figma:check": "node ./scripts/generate-figma-check.mjs",
     "lint": "eslint . --max-warnings 0",
     "clean": "rm -rf dist .turbo node_modules"
   },

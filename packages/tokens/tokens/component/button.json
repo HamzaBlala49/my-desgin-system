@@ -1,0 +1,89 @@
+{
+  "component": {
+    "button": {
+      "radius": { "value": "{radius.md}", "type": "borderRadius" },
+      "focus-ring": { "value": "{semantic.color.focus}", "type": "color" },
+      "primary": {
+        "background": {
+          "value": "{semantic.color.accent.solid}",
+          "type": "color"
+        },
+        "background-hover": {
+          "value": "{semantic.color.accent.solid-hover}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.accent.contrast}",
+          "type": "color"
+        },
+        "border": { "value": "transparent", "type": "color" }
+      },
+      "secondary": {
+        "background": {
+          "value": "{semantic.color.surface.raised}",
+          "type": "color"
+        },
+        "background-hover": {
+          "value": "{semantic.color.surface.hover}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.content.primary}",
+          "type": "color"
+        },
+        "border": {
+          "value": "{semantic.color.stroke.default}",
+          "type": "color"
+        }
+      },
+      "outline": {
+        "background": { "value": "transparent", "type": "color" },
+        "background-hover": {
+          "value": "{semantic.color.surface.subtle}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.content.primary}",
+          "type": "color"
+        },
+        "border": {
+          "value": "{semantic.color.stroke.default}",
+          "type": "color"
+        }
+      },
+      "ghost": {
+        "background": { "value": "transparent", "type": "color" },
+        "background-hover": {
+          "value": "{semantic.color.surface.subtle}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.content.primary}",
+          "type": "color"
+        },
+        "border": { "value": "transparent", "type": "color" }
+      },
+      "destructive": {
+        "background": {
+          "value": "{semantic.color.danger.solid}",
+          "type": "color"
+        },
+        "background-hover": {
+          "value": "{semantic.color.danger.solid-hover}",
+          "type": "color"
+        },
+        "foreground": {
+          "value": "{semantic.color.danger.contrast}",
+          "type": "color"
+        },
+        "border": { "value": "transparent", "type": "color" }
+      },
+      "link": {
+        "foreground": {
+          "value": "{semantic.color.accent.text}",
+          "type": "color"
+        }
+      }
+    }
+  }
+}

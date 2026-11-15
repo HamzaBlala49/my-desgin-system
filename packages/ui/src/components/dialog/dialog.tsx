@@ -14,7 +14,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-surface-overlay transition-opacity",
+      "fixed inset-0 z-50 bg-dialog-overlay transition-opacity",
       className,
     )}
     ref={ref}
@@ -31,7 +31,7 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       className={cn(
-        "fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border border-stroke-subtle bg-surface-raised p-6 text-content-primary shadow-lg",
+        "fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-dialog border border-dialog-border bg-dialog-background p-6 text-dialog-foreground shadow-lg",
         "focus:outline-none",
         className,
       )}
@@ -42,7 +42,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Close
         className={cn(
           "absolute end-4 top-4 rounded-sm opacity-70 transition-opacity",
-          "hover:opacity-100 focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none",
+          "hover:opacity-100 focus-visible:ring-2 focus-visible:ring-dialog-focus-ring focus-visible:outline-none",
           "disabled:pointer-events-none",
         )}
       >
@@ -89,7 +89,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     className={cn(
-      "text-lg leading-tight font-semibold tracking-tight text-content-primary",
+      "text-lg leading-tight font-semibold tracking-tight text-dialog-title",
       className,
     )}
     ref={ref}
@@ -103,7 +103,7 @@ const DialogDescription = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
-    className={cn("text-sm leading-normal text-content-secondary", className)}
+    className={cn("text-sm leading-normal text-dialog-description", className)}
     ref={ref}
     {...props}
   />

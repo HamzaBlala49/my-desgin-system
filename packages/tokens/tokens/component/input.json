@@ -1,0 +1,25 @@
+{
+  "component": {
+    "input": {
+      "radius": { "value": "{radius.md}", "type": "borderRadius" },
+      "background": {
+        "value": "{semantic.color.surface.canvas}",
+        "type": "color"
+      },
+      "foreground": {
+        "value": "{semantic.color.content.primary}",
+        "type": "color"
+      },
+      "placeholder": {
+        "value": "{semantic.color.content.secondary}",
+        "type": "color"
+      },
+      "border": { "value": "{semantic.color.stroke.default}", "type": "color" },
+      "border-invalid": {
+        "value": "{semantic.color.danger.solid}",
+        "type": "color"
+      },
+      "focus-ring": { "value": "{semantic.color.focus}", "type": "color" }
+    }
+  }
+}

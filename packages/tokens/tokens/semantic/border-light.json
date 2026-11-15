@@ -1,0 +1,69 @@
+{
+  "border": {
+    "radius": {
+      "default": {
+        "value": "{radius.rounded}",
+        "type": "number",
+        "$extensions": {
+          "com.figma.scopes": ["CORNER_RADIUS"]
+        }
+      },
+      "modal": {
+        "value": "{radius.rounded-lg}",
+        "type": "number",
+        "description": "modal, box, drawer",
+        "$extensions": {
+          "com.figma.scopes": ["CORNER_RADIUS"]
+        }
+      },
+      "full": {
+        "value": "{radius.rounded-full}",
+        "type": "number",
+        "description": "chip, badge, avatar",
+        "$extensions": {
+          "com.figma.scopes": ["CORNER_RADIUS"]
+        }
+      },
+      "none": {
+        "value": "{radius.rounded-none}",
+        "type": "number",
+        "$extensions": {
+          "com.figma.scopes": ["CORNER_RADIUS"]
+        }
+      },
+      "xl": {
+        "value": "{radius.rounded-xl}",
+        "type": "number",
+        "description": "modal, box, drawer",
+        "$extensions": {
+          "com.figma.scopes": ["CORNER_RADIUS"]
+        }
+      },
+      "2xl": {
+        "value": "{radius.rounded-2xl}",
+        "type": "number",
+        "description": "modal, box, drawer",
+        "$extensions": {
+          "com.figma.scopes": ["CORNER_RADIUS"]
+        }
+      },
+      "3xl": {
+        "value": "{radius.rounded-3xl}",
+        "type": "number",
+        "description": "modal, box, drawer",
+        "$extensions": {
+          "com.figma.scopes": ["CORNER_RADIUS"]
+        }
+      }
+    },
+    "width": {
+      "default": {
+        "value": "{width.border-1}",
+        "type": "number",
+        "$extensions": {
+          "com.figma.scopes": ["STROKE_FLOAT"]
+        }
+      }
+    }
+  }
+}

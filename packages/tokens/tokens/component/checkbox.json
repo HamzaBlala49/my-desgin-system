@@ -1,0 +1,21 @@
+{
+  "component": {
+    "checkbox": {
+      "radius": { "value": "{radius.sm}", "type": "borderRadius" },
+      "background": {
+        "value": "{semantic.color.surface.canvas}",
+        "type": "color"
+      },
+      "border": { "value": "{semantic.color.stroke.strong}", "type": "color" },
+      "checked-background": {
+        "value": "{semantic.color.accent.solid}",
+        "type": "color"
+      },
+      "checked-foreground": {
+        "value": "{semantic.color.accent.contrast}",
+        "type": "color"
+      },
+      "focus-ring": { "value": "{semantic.color.focus}", "type": "color" }
+    }
+  }
+}
