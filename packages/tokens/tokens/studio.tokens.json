@@ -1,0 +1,15 @@
+{
+  "global": {},
+  "core": {},
+  "semantic": {},
+  "themes/dark": {},
+  "$themes": [],
+  "$metadata": {
+    "tokenSetOrder": [
+      "global",
+      "core",
+      "semantic",
+      "themes/dark"
+    ]
+  }
+}
