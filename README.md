@@ -154,7 +154,11 @@ RTL is supported through logical properties (`ps-*`, `pe-*`, `ms-*`, `me-*`,
 document.documentElement.dir = "rtl";
 ```
 
-## Figma → Tokens Studio → GitHub
+## Figma → Tokens Studio → GitHub → Code
+
+**Figma is the source of truth.** Tokens are authored in Figma, pushed to
+GitHub by Tokens Studio, and consumed by the build. This repository never pushes
+tokens from code back into Figma.
 
 1. Create a free Figma account and duplicate a community kit for visual
    reference. This project uses **Untitled UI Free** as a visual reference only;
@@ -180,15 +184,35 @@ document.documentElement.dir = "rtl";
      - **Pro plan (multi-file)**:
        `packages/tokens/tokens/studio`
    - **Base URL**: leave empty for github.com
-6. Save, then choose **Push** (not Pull) in the sync modal.
-7. (Optional) Import the starter tokens so you begin from the Radix-based
-   scales:
-   - `core` set: import `tokens/core/color.json`, `space.json`, `radius.json`,
-     `typography.json`, `shadow.json`.
-   - `semantic` set: import `tokens/semantic/color.json`.
-   - `themes/dark` set: import `tokens/themes/dark/color.json` and
-     `semantic.json`.
-     Use each set's JSON view to paste/merge the contents, then push again.
+6. Define or edit the tokens inside the sets in Figma, then choose **Push** in
+   the sync modal. Push sends Figma → GitHub. Do not import the code fallback
+   into Figma unless you explicitly want to bootstrap the plugin once.
+
+> **Direction of sync:** Tokens Studio **Push** writes the Figma tokens to
+> GitHub (`studio.tokens.json` or `studio/`), and the code build consumes that
+> file. `Pull` does the opposite (GitHub → Figma) and is only used when you want
+> to bring pushed changes back into Figma. Nothing in this repository pushes
+> tokens to Figma.
+
+The files under `tokens/core`, `tokens/semantic`, and `tokens/themes/dark` are a
+**bootstrap fallback** for local development. The build **always merges the
+Figma export over the fallback**, so missing categories (colors, spacing,
+radius, semantic) remain available. Once the export provides a token, it
+overrides the fallback for that path.
+
+Free design systems often land in the `global` set with Tailwind-style names.
+The build normalizes them automatically:
+
+- `Box Shadow.*` → `shadow.*`
+- `fontSize.*` → `typography.fontSize.*` (`0` → `xs`, `1` → `sm`, ...)
+- `line-height.*` → `typography.lineHeight.*`
+- `fontWeights.*` → `typography.fontWeight.*` (`Regular` → `normal`, ...)
+- `letterSpacing.0` → `typography.letterSpacing.normal`
+- `typography.font-family.*` → `typography.fontFamily.*`
+
+So a `global`-only export works without moving tokens into `core` or
+`semantic`; those sets are for organization and for tokens that are not in the
+free design system (colors, spacing, radius, semantic).
 
 The build script auto-detects the storage mode:
 
@@ -196,7 +220,7 @@ The build script auto-detects the storage mode:
 | ------------------ | ------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Single file (free) | `packages/tokens/tokens/studio.tokens.json` | merges non-dark sets for light; set names containing `dark` (e.g. `themes/dark`) for dark |
 | Multi-file (Pro)   | `packages/tokens/tokens/studio`             | merges non-dark JSON files for light; files containing `dark` in the name for dark        |
-| Manual fallback    | —                                           | `tokens/core/*`, `tokens/semantic/*`, `tokens/themes/dark/*`                              |
+| Bootstrap fallback | —                                           | always merged under the Figma export; supplies missing colors, spacing, radius, semantic  |
 
 The console output confirms the detected mode:
 
@@ -212,7 +236,7 @@ Built @repo/tokens (light: studio-file, dark: studio-file) → ...
 > multi-file sync is still recommended for teams because it is easier to review
 > in git and avoids a large single file.
 
-8. The `Tokens` GitHub Actions workflow validates the build and uploads the
+7. The `Tokens` GitHub Actions workflow validates the build and uploads the
    generated `dist` artifact. `dist` is never committed; it is produced by CI
    and before publishing.
 

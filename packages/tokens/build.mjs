@@ -18,8 +18,60 @@ const root = __dirname;
 const tokensRoot = resolve(root, "tokens");
 const studioFile = resolve(tokensRoot, "studio.tokens.json");
 const studioFolder = resolve(tokensRoot, "studio");
+const fallbackLightFiles = [
+  resolve(tokensRoot, "core/color.json"),
+  resolve(tokensRoot, "core/space.json"),
+  resolve(tokensRoot, "core/radius.json"),
+  resolve(tokensRoot, "core/typography.json"),
+  resolve(tokensRoot, "core/shadow.json"),
+  resolve(tokensRoot, "semantic/color.json"),
+];
+const fallbackDarkFiles = [
+  resolve(tokensRoot, "themes/dark/color.json"),
+  resolve(tokensRoot, "themes/dark/semantic.json"),
+];
 
 register(StyleDictionary);
+
+function shadowUnit(value) {
+  if (typeof value === "number") {
+    return `${value}px`;
+  }
+
+  return /^-?\d+(?:\.\d+)?$/.test(String(value)) ? `${value}px` : value;
+}
+
+StyleDictionary.registerTransform({
+  name: "ds/box-shadow",
+  type: "value",
+  transitive: true,
+  filter: (token) => {
+    const type = token.type ?? token.$type;
+    return type === "boxShadow" || type === "shadow";
+  },
+  transform: (token) => {
+    const value = token.value ?? token.$value;
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    const shadows = Array.isArray(value) ? value : [value];
+
+    return shadows
+      .map((shadow) => {
+        const inset =
+          shadow.type === "innerShadow" || shadow.type === "inset"
+            ? "inset "
+            : "";
+
+        return `${inset}${shadowUnit(shadow.x)} ${shadowUnit(shadow.y)} ${shadowUnit(
+          shadow.blur,
+        )} ${shadowUnit(shadow.spread)} ${shadow.color}`;
+      })
+      .join(", ");
+  },
+});
 
 function flatTokens(dictionary) {
   return Object.fromEntries(
@@ -170,6 +222,163 @@ function mergeTokenTrees(trees) {
   return trees.reduce((result, tree) => deepMerge(result, tree), {});
 }
 
+function getTokenValue(token) {
+  if (!token || typeof token !== "object") {
+    return undefined;
+  }
+
+  return token.$value ?? token.value;
+}
+
+function setTokenValue(token, value) {
+  if ("$value" in token) {
+    return { ...token, $value: value };
+  }
+
+  return { ...token, value };
+}
+
+const FONT_SIZE_NAMES = [
+  "xs",
+  "sm",
+  "md",
+  "lg",
+  "xl",
+  "2xl",
+  "3xl",
+  "4xl",
+  "5xl",
+  "6xl",
+  "7xl",
+  "8xl",
+  "9xl",
+];
+
+const FONT_WEIGHT_NAMES = {
+  regular: "normal",
+  normal: "normal",
+  medium: "medium",
+  "semi bold": "semibold",
+  semibold: "semibold",
+  bold: "bold",
+};
+
+const SHADOW_NAMES = {
+  "shadow-sm": "sm",
+  shadow: "base",
+  "shadow-md": "md",
+  "shadow-lg": "lg",
+  "shadow-xl": "xl",
+  "shadow-2xl": "2xl",
+  "shadow-inner": "inner",
+};
+
+function normalizeFigmaTokens(raw) {
+  if (!raw || typeof raw !== "object") {
+    return {};
+  }
+
+  const out = {};
+
+  for (const key of [
+    "color",
+    "semantic",
+    "space",
+    "radius",
+    "border",
+    "opacity",
+    "zIndex",
+    "component",
+  ]) {
+    if (raw[key]) {
+      out[key] = raw[key];
+    }
+  }
+
+  const fontFamily =
+    raw.typography?.["font-family"] ?? raw.typography?.fontFamily;
+
+  if (fontFamily) {
+    out.typography = out.typography ?? {};
+    out.typography.fontFamily = { ...fontFamily };
+  }
+
+  const fontSize = raw.fontSize ?? raw.typography?.fontSize;
+
+  if (fontSize) {
+    out.typography = out.typography ?? {};
+    out.typography.fontSize = {};
+
+    const entries = Object.entries(fontSize);
+    const numericKeys = entries.every(([key]) => /^\d+$/.test(key));
+    const sorted = numericKeys
+      ? entries.sort(([a], [b]) => Number(a) - Number(b))
+      : entries;
+
+    sorted.forEach(([key, token], index) => {
+      const name = numericKeys ? (FONT_SIZE_NAMES[index] ?? key) : key;
+      const value = getTokenValue(token);
+      const nextValue = typeof value === "number" ? `${value}px` : value;
+
+      out.typography.fontSize[name] = setTokenValue(token, nextValue);
+    });
+  }
+
+  const fontWeight = raw.fontWeights ?? raw.typography?.fontWeight;
+
+  if (fontWeight) {
+    out.typography = out.typography ?? {};
+    out.typography.fontWeight = {};
+
+    for (const [key, token] of Object.entries(fontWeight)) {
+      const value = String(getTokenValue(token) ?? "")
+        .toLowerCase()
+        .trim();
+      const name = FONT_WEIGHT_NAMES[value] ?? key;
+
+      out.typography.fontWeight[name] = token;
+    }
+  }
+
+  const lineHeight = raw["line-height"] ?? raw.typography?.lineHeight;
+
+  if (lineHeight) {
+    out.typography = out.typography ?? {};
+    out.typography.lineHeight = {};
+
+    for (const [name, token] of Object.entries(lineHeight)) {
+      const value = getTokenValue(token);
+      const nextValue =
+        typeof value === "number" && value > 4 ? `${value}px` : value;
+
+      out.typography.lineHeight[name] = setTokenValue(token, nextValue);
+    }
+  }
+
+  const letterSpacing = raw.letterSpacing ?? raw.typography?.letterSpacing;
+
+  if (letterSpacing) {
+    out.typography = out.typography ?? {};
+    out.typography.letterSpacing = {};
+
+    for (const [name, token] of Object.entries(letterSpacing)) {
+      out.typography.letterSpacing[name === "0" ? "normal" : name] = token;
+    }
+  }
+
+  const shadows = raw["Box Shadow"] ?? raw.shadow;
+
+  if (shadows) {
+    out.shadow = {};
+
+    for (const [key, token] of Object.entries(shadows)) {
+      out.shadow[SHADOW_NAMES[key] ?? key] = token;
+    }
+  }
+
+  return out;
+}
+
 async function loadStudioFile() {
   const json = await readJson(studioFile);
   const { $themes, ...sets } = json;
@@ -182,9 +391,9 @@ async function loadStudioFile() {
     }
 
     if (isDarkSetName(name)) {
-      darkTrees.push(set);
+      darkTrees.push(normalizeFigmaTokens(set));
     } else {
-      lightTrees.push(set);
+      lightTrees.push(normalizeFigmaTokens(set));
     }
   }
 
@@ -195,23 +404,10 @@ async function loadStudioFile() {
   };
 }
 
-async function readTokenPaths(files) {
-  const contents = await Promise.all(
-    files.map(async (file) => JSON.parse(await readFile(file, "utf8"))),
-  );
-  const paths = contents.flatMap((json) => collectPaths(json));
-  const seen = new Set();
+async function loadTokenTree(files) {
+  const contents = await Promise.all(files.map((file) => readJson(file)));
 
-  return paths.filter((path) => {
-    const key = path.join(".");
-
-    if (seen.has(key)) {
-      return false;
-    }
-
-    seen.add(key);
-    return true;
-  });
+  return mergeTokenTrees(contents);
 }
 
 async function resolveLightSources() {
@@ -247,14 +443,7 @@ async function resolveLightSources() {
 
   return {
     mode: "manual",
-    sources: [
-      resolve(tokensRoot, "core/color.json"),
-      resolve(tokensRoot, "core/space.json"),
-      resolve(tokensRoot, "core/radius.json"),
-      resolve(tokensRoot, "core/typography.json"),
-      resolve(tokensRoot, "core/shadow.json"),
-      resolve(tokensRoot, "semantic/color.json"),
-    ],
+    sources: fallbackLightFiles,
   };
 }
 
@@ -281,10 +470,7 @@ async function resolveDarkSources() {
 
   return {
     mode: "manual",
-    sources: [
-      resolve(tokensRoot, "themes/dark/color.json"),
-      resolve(tokensRoot, "themes/dark/semantic.json"),
-    ],
+    sources: fallbackDarkFiles,
   };
 }
 
@@ -377,17 +563,23 @@ async function build() {
   const tempDir = await mkdtemp(join(root, "dist/.tmp-"));
   const lightSources = await resolveLightSources();
   const darkSources = await resolveDarkSources();
+  const fallbackLight = await loadTokenTree(fallbackLightFiles);
+  const fallbackDark = await loadTokenTree(fallbackDarkFiles);
+  const figmaLight =
+    lightSources.tokens ?? (await loadTokenTree(lightSources.sources));
+  const figmaDark =
+    darkSources.tokens ?? (await loadTokenTree(darkSources.sources));
+  const lightTokens = deepMerge(structuredClone(fallbackLight), figmaLight);
+  const darkTokens = deepMerge(structuredClone(fallbackDark), figmaDark);
 
   const light = new StyleDictionary({
-    ...(lightSources.tokens
-      ? { tokens: lightSources.tokens }
-      : { source: lightSources.sources }),
+    tokens: lightTokens,
     preprocessors: ["tokens-studio"],
     platforms: {
       css: {
         prefix: "ds",
         transformGroup: "tokens-studio",
-        transforms: ["name/kebab"],
+        transforms: ["name/kebab", "ds/box-shadow"],
         buildPath: `${tempDir}/`,
         files: [
           {
@@ -402,6 +594,7 @@ async function build() {
       },
       js: {
         transformGroup: "tokens-studio",
+        transforms: ["ds/box-shadow"],
         buildPath: resolve(root, "dist/"),
         files: [
           { destination: "tokens.json", format: "ds/json" },
@@ -414,15 +607,13 @@ async function build() {
   });
 
   const dark = new StyleDictionary({
-    ...(darkSources.tokens
-      ? { tokens: darkSources.tokens }
-      : { source: darkSources.sources }),
+    tokens: darkTokens,
     preprocessors: ["tokens-studio"],
     platforms: {
       css: {
         prefix: "ds",
         transformGroup: "tokens-studio",
-        transforms: ["name/kebab"],
+        transforms: ["name/kebab", "ds/box-shadow"],
         buildPath: `${tempDir}/`,
         files: [
           {
@@ -448,9 +639,7 @@ async function build() {
 
   await writeFile(resolve(root, "dist/variables.css"), variablesCss, "utf8");
 
-  const lightPaths = lightSources.tokens
-    ? collectPaths(lightSources.tokens)
-    : await readTokenPaths(lightSources.sources);
+  const lightPaths = collectPaths(lightTokens);
 
   const semanticColors = lightPaths
     .filter((path) => path[0] === "semantic" && path[1] === "color")
