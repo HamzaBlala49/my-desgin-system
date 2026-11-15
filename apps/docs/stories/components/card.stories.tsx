@@ -29,8 +29,8 @@ export const Default: Story = {
       </CardHeader>
       <CardContent>
         <p className="text-sm leading-normal text-content-secondary">
-          Primitives come from Radix Colors, while semantic tokens map them to
-          product decisions.
+          Primitives come from the Figma token export, while semantic tokens map
+          them to product decisions.
         </p>
       </CardContent>
       <CardFooter>

@@ -19,17 +19,10 @@ const tokensRoot = resolve(root, "tokens");
 const studioFile = resolve(tokensRoot, "studio.tokens.json");
 const studioFolder = resolve(tokensRoot, "studio");
 const fallbackLightFiles = [
-  resolve(tokensRoot, "core/color.json"),
-  resolve(tokensRoot, "core/space.json"),
-  resolve(tokensRoot, "core/radius.json"),
-  resolve(tokensRoot, "core/typography.json"),
-  resolve(tokensRoot, "core/shadow.json"),
-  resolve(tokensRoot, "semantic/color.json"),
+  resolve(tokensRoot, "fallbacks/typography.json"),
+  resolve(tokensRoot, "fallbacks/shadow.json"),
 ];
-const fallbackDarkFiles = [
-  resolve(tokensRoot, "themes/dark/color.json"),
-  resolve(tokensRoot, "themes/dark/semantic.json"),
-];
+const fallbackDarkFiles = [];
 
 register(StyleDictionary);
 
@@ -374,7 +367,7 @@ function compactObject(value) {
   return Object.fromEntries(entries);
 }
 
-function mapPlusUiSemanticColors(color) {
+function mapPlusUiSemanticColors(color, isDark = false) {
   if (!color?.background || !color?.text || !color?.border) {
     return {};
   }
@@ -396,6 +389,10 @@ function mapPlusUiSemanticColors(color) {
       raised: tokenRef(color, "background.surface"),
       hover: tokenRef(color, "background.default.hovered"),
       active: tokenRef(color, "background.default.pressed"),
+      overlay: {
+        value: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.4)",
+        type: "color",
+      },
     },
     content: {
       primary: tokenRef(color, "text.default"),
@@ -619,15 +616,83 @@ function normalizeFigmaTokens(raw, setName = "") {
 
   if (raw.color?.background && raw.color?.text) {
     out.semantic = out.semantic ?? {};
-    out.semantic.color = mapPlusUiSemanticColors(raw.color);
+    out.semantic.color = mapPlusUiSemanticColors(
+      raw.color,
+      setName.toLowerCase().includes("dark"),
+    );
   }
 
   return out;
 }
 
+function loadStructuredStudioFile(sets, $themes) {
+  const sharedNames = [
+    "primitives/typography-en",
+    "primitives/typography-ar",
+    "primitives/space",
+    "primitives/radius",
+    "primitives/border-width",
+    "primitives/shadow",
+    "primitives/opacity",
+    "primitives/sizing",
+    "primitives/breakpoints",
+  ];
+  const shared = mergeTokenTrees(
+    sharedNames
+      .filter((name) => sets[name] && hasTokens(sets[name]))
+      .map((name) => normalizeFigmaTokens(sets[name], name)),
+  );
+
+  const lightColor = sets["primitives/color-light"] ?? {};
+  const darkColor = sets["primitives/color-dark"] ?? lightColor;
+
+  const lightSemantic = mergeTokenTrees(
+    Object.entries(sets)
+      .filter(
+        ([name]) =>
+          name.startsWith("semantic/") &&
+          name.toLowerCase().includes("light"),
+      )
+      .map(([name, set]) => normalizeFigmaTokens(set, name)),
+  );
+  const darkSemantic = mergeTokenTrees(
+    Object.entries(sets)
+      .filter(
+        ([name]) =>
+          name.startsWith("semantic/") &&
+          name.toLowerCase().includes("dark"),
+      )
+      .map(([name, set]) => normalizeFigmaTokens(set, name)),
+  );
+
+  return {
+    light: mergeTokenTrees([
+      normalizeFigmaTokens(lightColor, "primitives/color-light"),
+      shared,
+      lightSemantic,
+    ]),
+    dark: mergeTokenTrees([
+      normalizeFigmaTokens(darkColor, "primitives/color-dark"),
+      shared,
+      darkSemantic,
+    ]),
+    themes: $themes ?? [],
+  };
+}
+
 async function loadStudioFile() {
   const json = await readJson(studioFile);
   const { $themes, ...sets } = json;
+  const names = Object.keys(sets);
+  const isStructured = names.some(
+    (name) =>
+      name.startsWith("primitives/") || name.startsWith("semantic/"),
+  );
+
+  if (isStructured) {
+    return loadStructuredStudioFile(sets, $themes);
+  }
+
   const shared = [];
   const lightThemes = [];
   const darkThemes = [];

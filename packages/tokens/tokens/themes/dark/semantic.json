@@ -1,9 +1,0 @@
-{
-  "semantic": {
-    "color": {
-      "surface": {
-        "overlay": { "value": "rgba(0, 0, 0, 0.6)", "type": "color" }
-      }
-    }
-  }
-}

@@ -11,15 +11,16 @@ truth.
 These files are written by Tokens Studio when you press **Push**. Do not edit
 them by hand.
 
-## Bootstrap fallback
+## Minimal fallback
 
-- `core/` — primitive tokens (`color`, `space`, `radius`, `typography`, `shadow`)
-- `semantic/` — semantic aliases (`semantic.color.*`)
-- `themes/dark/` — dark overrides
+- `fallbacks/typography.json` — `font-sans`/`font-mono` and
+  `letterSpacing.tight`/`wide`
+- `fallbacks/shadow.json` — `shadow.xs`
 
-These are only used while the Figma export is empty, so the repo can be built
-before the first push. They are **not** pushed back to Figma. Once
-`studio.tokens.json` (or `studio/`) contains tokens, the build ignores them.
+Colors, spacing, radius, typography sizes/weights/line-heights, and shadows come
+from the Figma export. The fallback files only fill values that the Figma export
+does not provide. The Figma export always wins for any path it defines. The
+fallback is **not** pushed back to Figma.
 
 ## Flow
 

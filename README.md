@@ -21,7 +21,7 @@ GitHub: packages/tokens/tokens/studio.tokens.json
   │  pnpm tokens  (packages/tokens/build.mjs)
   │  1. split sets into shared / light / dark
   │  2. normalize Plus UI names into the design-system contract
-  │  3. merge the Figma export over the bootstrap fallback
+  │  3. merge the Figma export over a minimal fallback
   ▼
 packages/tokens/dist/
   ├── variables.css    --ds-* variables for :root and [data-theme="dark"]
@@ -48,8 +48,8 @@ Changesets → npm
    scripts.
 2. **Token pipeline** — `@repo/tokens` with Style Dictionary v5 and
    `@tokens-studio/sd-transforms`. Three-tier token architecture
-   (primitive → semantic → component) and a bootstrap fallback generated from
-   Radix Colors.
+   (primitive → semantic → component) and a minimal fallback for the few values
+   Figma does not export.
 3. **Figma integration** — Tokens Studio GitHub sync with support for both
    single-file (free) and multi-file (Pro) token storage.
 4. **Plus UI normalization** — the build understands the Plus UI community set
@@ -78,10 +78,9 @@ Changesets → npm
 │   ├── tokens/                     # @repo/tokens — token pipeline
 │   │   ├── tokens/
 │   │   │   ├── studio.tokens.json  # Figma export — source of truth
-│   │   │   ├── core/               # bootstrap fallback primitives
-│   │   │   ├── semantic/           # bootstrap fallback semantics
-│   │   │   └── themes/dark/        # bootstrap fallback dark overrides
-│   │   ├── scripts/sync-radix.mjs  # generates the Radix fallback
+│   │   │   └── fallbacks/          # only values Figma does not export
+│   │   │       ├── typography.json # font-sans/mono + tracking
+│   │   │       └── shadow.json     # shadow.xs
 │   │   └── build.mjs               # normalize + Style Dictionary build
 │   ├── ui/                         # @repo/ui — React components
 │   │   ├── src/components/
@@ -123,7 +122,7 @@ pnpm dev
 | `pnpm typecheck`   | Typecheck all packages                          |
 | `pnpm test`        | Run Vitest + Testing Library + jest-axe         |
 | `pnpm tokens`      | Build tokens only                               |
-| `pnpm sync:tokens` | Regenerate the Radix fallback tokens            |
+| `pnpm figma:check` | Generate a sandbox Figma import bundle          |
 | `pnpm changeset`   | Create a changeset                              |
 | `pnpm release`     | Build and publish via Changesets                |
 | `pnpm format`      | Format with Prettier                            |
@@ -182,7 +181,8 @@ and normalizes them into the design-system contract.
 1. **Read the export**
    - Single file: `tokens/studio.tokens.json`.
    - Multi-file (Pro): `tokens/studio/`.
-   - If the export is missing or empty, fall back to the bootstrap tokens.
+   - If the export is missing or empty, the build warns and uses only the
+     minimal fallback. Colors will be missing until Figma pushes tokens.
 
 2. **Split the sets**
    - A set whose name contains `dark` → dark theme.
@@ -192,6 +192,14 @@ and normalizes them into the design-system contract.
    - The dark build includes the shared sets **and** the dark theme so that
      aliases such as `{primary.700}`, `{radius.rounded}`, and
      `{font-family.default}` resolve.
+   - If the export uses the structured `primitives/*` + `semantic/*` layout,
+     the build switches to:
+     - light = `primitives/color-light` + shared primitives +
+       `semantic/*-light`
+     - dark = `primitives/color-dark` + shared primitives +
+       `semantic/*-dark`
+     - shared primitives = `typography-en`, `typography-ar`, `space`, `radius`,
+       `border-width`, `shadow`, `opacity`, `sizing`, `breakpoints`.
 
 3. **Normalize the names**
    - Color families are copied as primitives.
@@ -222,7 +230,7 @@ and normalizes them into the design-system contract.
    | `surface.raised`      | `color.background.surface`                          |
    | `surface.hover`       | `color.background.default.hovered`                  |
    | `surface.active`      | `color.background.default.pressed`                  |
-   | `surface.overlay`     | fallback (`rgba(0,0,0,0.4/0.6)`)                    |
+   | `surface.overlay`     | generated per theme (`rgba(0,0,0,0.4/0.6)`)         |
    | `content.primary`     | `color.text.default`                                |
    | `content.secondary`   | `color.text.caption`                                |
    | `content.disabled`    | `color.text.disabled`                               |
@@ -243,48 +251,36 @@ and normalizes them into the design-system contract.
    | `info.*`              | `color.background.info.*` / `color.text.info`       |
    | `focus`               | `color.border.ring`                                 |
 
-5. **Merge over the bootstrap fallback**
+5. **Merge with the minimal fallback**
 
-   The Figma export is deep-merged over the fallback, so any missing token
-   keeps its fallback value. The fallback currently supplies:
+   The Figma export is deep-merged over the minimal fallback, so any missing
+   token keeps its fallback value. The fallback currently supplies only:
 
-   - `semantic.color.surface.overlay`
    - `shadow.xs`
-   - `letterSpacing.tight` / `letterSpacing.wide`
-   - Any token that a future Figma version does not export.
+   - `typography.fontFamily.sans` / `typography.fontFamily.mono`
+   - `typography.letterSpacing.tight` / `typography.letterSpacing.wide`
+
+   All colors, spacing, radius, font sizes, font weights, line heights, and the
+   remaining shadows come from Figma.
 
 6. **Build CSS and JS**
 
    Style Dictionary produces the files described below.
 
-### Bootstrap fallback
+### Minimal fallback
 
 The fallback lives in:
 
 ```text
 packages/tokens/tokens/
-├── core/{color,space,radius,typography,shadow}.json
-├── semantic/color.json
-└── themes/dark/{color,semantic}.json
+└── fallbacks/
+    ├── typography.json   # font-sans/mono + tracking
+    └── shadow.json       # shadow.xs
 ```
 
-It is generated from **Radix Colors** and is only used when the Figma export is
-missing, empty, or does not provide a token. To regenerate it:
-
-```bash
-pnpm sync:tokens
-pnpm tokens
-```
-
-When the Figma export provides primitives **and** semantic colors, the build
-drops the fallback color primitives and semantic colors from the output. They do
-not override or duplicate the Plus UI colors. The fallback then supplies only
-the tokens that the Figma export does not provide:
-
-- `semantic.color.surface.overlay`
-- `shadow.xs`
-- `typography.fontFamily.sans` / `typography.fontFamily.mono`
-- `typography.letterSpacing.tight` / `typography.letterSpacing.wide`
+It only fills values that the Figma export does not provide. The Figma export
+always wins for any token path it defines. There are no fallback colors anymore;
+the old Radix-based `core/semantic/themes` fallback files were removed.
 
 The fallback is not the source of truth and is not pushed back to Figma.
 
@@ -353,8 +349,60 @@ Resolved values from the current Plus UI export:
    generated `dist` artifact.
 
 > **Do not edit `studio.tokens.json` by hand.** It is written by Tokens Studio.
-> The bootstrap files under `tokens/core`, `tokens/semantic`, and
-> `tokens/themes/dark` are edited only by `pnpm sync:tokens`.
+> The only hand-maintained token files are the minimal fallbacks under
+> `tokens/fallbacks/`.
+
+### One-time migration: write the structured sets to Figma
+
+The target Figma structure is:
+
+```text
+primitives/
+  color-light.json
+  color-dark.json
+  typography-en.json
+  typography-ar.json
+  space.json
+  radius.json
+  border-width.json
+  shadow.json
+  opacity.json
+  sizing.json
+  breakpoints.json
+semantic/
+  color-light.json
+  color-dark.json
+  border-light.json
+  border-dark.json
+  typography-light.json
+  typography-dark.json
+```
+
+Generate the import bundle:
+
+```bash
+pnpm figma:check
+```
+
+This writes `packages/tokens/figma-check/figma-check.tokens.json` plus the same
+structure as individual files. The `figma-check/` folder is gitignored.
+
+Migration steps:
+
+1. Import `figma-check.tokens.json` into a **new sandbox Figma file** first and
+   verify the sets.
+2. If correct, import it into the production Figma file **once** to replace the
+   Plus UI sets.
+3. Push from Tokens Studio to GitHub. The build detects `primitives/*` and
+   `semantic/*` automatically:
+   - Light: `primitives/color-light` + shared primitives + `semantic/*-light`
+   - Dark: `primitives/color-dark` + shared primitives + `semantic/*-dark`
+4. After this one-time migration, the flow is **Figma → GitHub → code**. Do not
+   run `figma:check` again for production.
+
+> `primitives/color-dark` currently contains the same primitive scales as light
+> because Plus UI primitives are mode-independent. You can replace it with a
+> real dark primitive palette later; the build will use it automatically.
 
 ## Tailwind v4 integration
 
@@ -515,15 +563,14 @@ changeset bumps `@repo/tokens` and `@repo/ui` to their first minor version.
   it can be filtered later if bundle size becomes a concern.
 - The Plus UI organization is kept as is. There is no need to move tokens into
   `core`/`semantic`; the build adapter handles the mapping.
-- The fallback colors are dropped when the Figma export provides colors; the
-  fallback then supplies only `surface.overlay`, `shadow.xs`,
-  `font-sans`/`font-mono`, and `letterSpacing.tight`/`wide`.
-- `dist/tokens.json` no longer contains the old Radix primitive paths such as
-  `color.gray.1`; it contains the Plus UI paths such as `gray.50` and the
-  normalized semantic tokens.
-- The primary accent is now **indigo** (Plus UI brand) instead of the previous
-  Radix blue. The component API is unchanged because components use semantic
-  tokens.
+- There are **no fallback colors** anymore. The old Radix-based
+  `core/semantic/themes` fallback files were removed. The minimal fallback
+  supplies only `shadow.xs`, `font-sans`/`font-mono`, and
+  `letterSpacing.tight`/`wide`.
+- `dist/tokens.json` contains the Plus UI primitive paths such as `gray.50` and
+  the normalized semantic tokens. It no longer contains `color.gray.1`.
+- The primary accent is **indigo** (Plus UI brand). The component API is
+  unchanged because components use semantic tokens.
 
 ### Possible next steps
 
@@ -536,11 +583,7 @@ changeset bumps `@repo/tokens` and `@repo/ui` to their first minor version.
 
 ## Attribution and licenses
 
-- **Radix Colors** (MIT) — fallback primitive color scales. See
-  `packages/tokens/THIRD_PARTY_LICENSES.md`.
 - **Radix UI** (MIT) — accessible component primitives.
 - **Plus UI** community token structure — current Figma token source. Verify the
   Figma file's license before redistributing its assets.
-- **Untitled UI Free** — used earlier as a visual reference only; not
-  redistributed.
 - This project does **not** use shadcn/ui tokens, naming, or configuration.
