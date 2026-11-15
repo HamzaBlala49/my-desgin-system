@@ -263,6 +263,15 @@ const FONT_WEIGHT_NAMES = {
   bold: "bold",
 };
 
+const FONT_WEIGHT_KEY_NAMES = {
+  regular: "normal",
+  normal: "normal",
+  medium: "medium",
+  "semi-bold": "semibold",
+  semibold: "semibold",
+  bold: "bold",
+};
+
 const SHADOW_NAMES = {
   "shadow-sm": "sm",
   shadow: "base",
@@ -273,37 +282,207 @@ const SHADOW_NAMES = {
   "shadow-inner": "inner",
 };
 
-function normalizeFigmaTokens(raw) {
+const RADIUS_NAMES = {
+  "rounded-none": "none",
+  "rounded-sm": "xs",
+  rounded: "sm",
+  "rounded-md": "md",
+  "rounded-lg": "lg",
+  "rounded-xl": "xl",
+  "rounded-2xl": "2xl",
+  "rounded-3xl": "3xl",
+  "rounded-full": "full",
+};
+
+const COLOR_FAMILIES = new Set([
+  "blue",
+  "purple",
+  "gray",
+  "red",
+  "green",
+  "yellow",
+  "slate",
+  "zinc",
+  "neutral",
+  "stone",
+  "orange",
+  "amber",
+  "lime",
+  "emerald",
+  "teal",
+  "cyan",
+  "sky",
+  "indigo",
+  "violet",
+  "fuchsia",
+  "pink",
+  "rose",
+  "white",
+  "black",
+]);
+
+const BRAND_GROUPS = [
+  "primary",
+  "neutral",
+  "info",
+  "success",
+  "warning",
+  "danger",
+  "base",
+];
+
+function toPx(value) {
+  return typeof value === "number" ? `${value}px` : value;
+}
+
+function getByPath(node, path) {
+  return path
+    .split(".")
+    .reduce((current, key) => (current ? current[key] : undefined), node);
+}
+
+function tokenRef(color, path) {
+  return getByPath(color, path)
+    ? { value: `{color.${path}}`, type: "color" }
+    : undefined;
+}
+
+function compactObject(value) {
+  if (!value || typeof value !== "object" || "value" in value) {
+    return value;
+  }
+
+  const entries = Object.entries(value)
+    .map(([key, child]) => [key, compactObject(child)])
+    .filter(([, child]) => {
+      if (child === undefined) {
+        return false;
+      }
+
+      if (
+        child &&
+        typeof child === "object" &&
+        !("value" in child) &&
+        Object.keys(child).length === 0
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+  return Object.fromEntries(entries);
+}
+
+function mapPlusUiSemanticColors(color) {
+  if (!color?.background || !color?.text || !color?.border) {
+    return {};
+  }
+
+  const status = (role) => ({
+    solid: tokenRef(color, `background.${role}.default`),
+    "solid-hover": tokenRef(color, `background.${role}.hovered`),
+    text: tokenRef(color, `text.${role}`),
+    emphasis: tokenRef(color, `background.${role}.pressed`),
+    subtle: tokenRef(color, `background.${role}.invert.default`),
+    "subtle-hover": tokenRef(color, `background.${role}.invert.hovered`),
+    contrast: tokenRef(color, "text.base"),
+  });
+
+  return compactObject({
+    surface: {
+      canvas: tokenRef(color, "background.default.default"),
+      subtle: tokenRef(color, "background.default.hovered"),
+      raised: tokenRef(color, "background.surface"),
+      hover: tokenRef(color, "background.default.hovered"),
+      active: tokenRef(color, "background.default.pressed"),
+    },
+    content: {
+      primary: tokenRef(color, "text.default"),
+      secondary: tokenRef(color, "text.caption"),
+      disabled: tokenRef(color, "text.disabled"),
+      inverse: tokenRef(color, "text.invert.default"),
+    },
+    stroke: {
+      subtle: tokenRef(color, "border.disabled"),
+      default: tokenRef(color, "border.default"),
+      strong: tokenRef(color, "border.default"),
+    },
+    accent: {
+      solid: tokenRef(color, "background.primary.default"),
+      "solid-hover": tokenRef(color, "background.primary.hovered"),
+      text: tokenRef(color, "text.primary"),
+      emphasis: tokenRef(color, "background.primary.pressed"),
+      subtle: tokenRef(color, "background.primary.invert.default"),
+      "subtle-hover": tokenRef(color, "background.primary.invert.hovered"),
+      contrast: tokenRef(color, "text.base"),
+    },
+    danger: status("danger"),
+    success: status("success"),
+    warning: status("warning"),
+    info: status("info"),
+    focus: tokenRef(color, "border.ring"),
+  });
+}
+
+function normalizeFigmaTokens(raw, setName = "") {
   if (!raw || typeof raw !== "object") {
     return {};
   }
 
   const out = {};
 
-  for (const key of [
-    "color",
-    "semantic",
-    "space",
-    "radius",
-    "border",
-    "opacity",
-    "zIndex",
-    "component",
-  ]) {
+  for (const key of ["color", "semantic", "border", "zIndex", "component"]) {
     if (raw[key]) {
       out[key] = raw[key];
     }
   }
 
+  for (const family of COLOR_FAMILIES) {
+    if (raw[family]) {
+      out[family] = raw[family];
+    }
+  }
+
+  for (const group of BRAND_GROUPS) {
+    if (raw[group]) {
+      out[group] = raw[group];
+    }
+  }
+
+  if (raw["font-family"]) {
+    out["font-family"] = raw["font-family"];
+  }
+
   const fontFamily =
-    raw.typography?.["font-family"] ?? raw.typography?.fontFamily;
+    raw["font-family"] ??
+    raw.typography?.["font-family"] ??
+    raw.typography?.fontFamily;
 
   if (fontFamily) {
     out.typography = out.typography ?? {};
     out.typography.fontFamily = { ...fontFamily };
   }
 
-  const fontSize = raw.fontSize ?? raw.typography?.fontSize;
+  const fontWeight =
+    raw["font-weight"] ?? raw.fontWeights ?? raw.typography?.fontWeight;
+
+  if (fontWeight) {
+    out.typography = out.typography ?? {};
+    out.typography.fontWeight = {};
+
+    for (const [key, token] of Object.entries(fontWeight)) {
+      const value = String(getTokenValue(token) ?? "")
+        .toLowerCase()
+        .trim();
+      const name =
+        FONT_WEIGHT_NAMES[value] ?? FONT_WEIGHT_KEY_NAMES[key] ?? key;
+
+      out.typography.fontWeight[name] = token;
+    }
+  }
+
+  const fontSize = raw["font-size"] ?? raw.fontSize ?? raw.typography?.fontSize;
 
   if (fontSize) {
     out.typography = out.typography ?? {};
@@ -318,26 +497,9 @@ function normalizeFigmaTokens(raw) {
     sorted.forEach(([key, token], index) => {
       const name = numericKeys ? (FONT_SIZE_NAMES[index] ?? key) : key;
       const value = getTokenValue(token);
-      const nextValue = typeof value === "number" ? `${value}px` : value;
 
-      out.typography.fontSize[name] = setTokenValue(token, nextValue);
+      out.typography.fontSize[name] = setTokenValue(token, toPx(value));
     });
-  }
-
-  const fontWeight = raw.fontWeights ?? raw.typography?.fontWeight;
-
-  if (fontWeight) {
-    out.typography = out.typography ?? {};
-    out.typography.fontWeight = {};
-
-    for (const [key, token] of Object.entries(fontWeight)) {
-      const value = String(getTokenValue(token) ?? "")
-        .toLowerCase()
-        .trim();
-      const name = FONT_WEIGHT_NAMES[value] ?? key;
-
-      out.typography.fontWeight[name] = token;
-    }
   }
 
   const lineHeight = raw["line-height"] ?? raw.typography?.lineHeight;
@@ -355,7 +517,8 @@ function normalizeFigmaTokens(raw) {
     }
   }
 
-  const letterSpacing = raw.letterSpacing ?? raw.typography?.letterSpacing;
+  const letterSpacing =
+    raw.letterSpacing ?? raw["letter-spacing"] ?? raw.typography?.letterSpacing;
 
   if (letterSpacing) {
     out.typography = out.typography ?? {};
@@ -376,30 +539,118 @@ function normalizeFigmaTokens(raw) {
     }
   }
 
+  if (raw.radius) {
+    out.radius = {};
+
+    for (const [name, token] of Object.entries(raw.radius)) {
+      out.radius[name] = setTokenValue(token, toPx(getTokenValue(token)));
+    }
+
+    for (const [source, target] of Object.entries(RADIUS_NAMES)) {
+      if (raw.radius[source]) {
+        out.radius[target] = {
+          value: `{radius.${source}}`,
+          type: "number",
+        };
+      }
+    }
+  }
+
+  if (raw.width) {
+    out.width = {};
+
+    for (const [name, token] of Object.entries(raw.width)) {
+      out.width[name] = setTokenValue(token, toPx(getTokenValue(token)));
+    }
+  }
+
+  const spacingEntries = Object.entries(raw).filter(([key]) =>
+    key.startsWith("space-"),
+  );
+
+  if (spacingEntries.length > 0) {
+    out.space = out.space ?? {};
+
+    for (const [key, token] of spacingEntries) {
+      const name = key.replace(/^space-/, "");
+
+      out.space[name] = setTokenValue(token, toPx(getTokenValue(token)));
+    }
+  }
+
+  const opacityEntries = Object.entries(raw).filter(([key]) =>
+    key.startsWith("opacity-"),
+  );
+
+  if (opacityEntries.length > 0) {
+    out.opacity = out.opacity ?? {};
+
+    for (const [key, token] of opacityEntries) {
+      const name = key.replace(/^opacity-/, "");
+      const value = Number(getTokenValue(token)) / 100;
+
+      out.opacity[name] = setTokenValue(token, value);
+    }
+  }
+
+  const sizingEntries = Object.entries(raw).filter(([key]) =>
+    key.startsWith("size-"),
+  );
+
+  if (sizingEntries.length > 0) {
+    out.size = out.size ?? {};
+
+    for (const [key, token] of sizingEntries) {
+      const name = key.replace(/^size-/, "");
+
+      out.size[name] = setTokenValue(token, toPx(getTokenValue(token)));
+    }
+  }
+
+  if (setName.toLowerCase().includes("breakpoints")) {
+    out.breakpoint = {};
+
+    for (const [name, token] of Object.entries(raw)) {
+      if (token && typeof token === "object") {
+        out.breakpoint[name] = setTokenValue(token, toPx(getTokenValue(token)));
+      }
+    }
+  }
+
+  if (raw.color?.background && raw.color?.text) {
+    out.semantic = out.semantic ?? {};
+    out.semantic.color = mapPlusUiSemanticColors(raw.color);
+  }
+
   return out;
 }
 
 async function loadStudioFile() {
   const json = await readJson(studioFile);
   const { $themes, ...sets } = json;
-  const lightTrees = [];
-  const darkTrees = [];
+  const shared = [];
+  const lightThemes = [];
+  const darkThemes = [];
 
   for (const [name, set] of Object.entries(sets)) {
     if (!hasTokens(set)) {
       continue;
     }
 
+    const normalized = normalizeFigmaTokens(set, name);
+
     if (isDarkSetName(name)) {
-      darkTrees.push(normalizeFigmaTokens(set));
+      darkThemes.push(normalized);
+    } else if (name.toLowerCase().includes("light")) {
+      lightThemes.push(normalized);
     } else {
-      lightTrees.push(normalizeFigmaTokens(set));
+      shared.push(normalized);
     }
   }
 
   return {
-    light: mergeTokenTrees(lightTrees),
-    dark: mergeTokenTrees(darkTrees),
+    light: mergeTokenTrees([...shared, ...lightThemes]),
+    dark: mergeTokenTrees([...shared, ...darkThemes]),
     themes: $themes ?? [],
   };
 }
