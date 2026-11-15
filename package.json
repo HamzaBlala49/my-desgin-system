@@ -4,18 +4,26 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "tokens": "pnpm --filter @repo/tokens build",
+    "sync:tokens": "pnpm --filter @repo/tokens sync:radix",
     "clean": "turbo run clean && rm -rf node_modules",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,md,css,json}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=docs^... && changeset publish",
+    "release": "turbo run build --filter=!@repo/docs --filter=!@repo/playground && changeset publish",
     "preview-storybook": "turbo run preview-storybook"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "prettier": "^3.2.5",
+    "prettier": "^3.10.1",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "turbo": "^2.11.10"
   },
   "packageManager": "pnpm@8.15.6",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "name": "design-system"
 }

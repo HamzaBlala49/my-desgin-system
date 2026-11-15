@@ -1,0 +1,42 @@
+{
+  "name": "@repo/tokens",
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "THIRD_PARTY_LICENSES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.mjs",
+      "require": "./dist/tokens.cjs"
+    },
+    "./css": "./dist/variables.css",
+    "./variables.css": "./dist/variables.css",
+    "./tailwind.css": "./dist/tailwind.css",
+    "./json": "./dist/tokens.json"
+  },
+  "scripts": {
+    "build": "node ./build.mjs",
+    "dev": "node ./build.mjs --watch",
+    "sync:radix": "node ./scripts/sync-radix.mjs",
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rm -rf dist .turbo node_modules"
+  },
+  "devDependencies": {
+    "@radix-ui/colors": "^3.0.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@tokens-studio/sd-transforms": "^2.0.3",
+    "eslint": "^8.57.0",
+    "style-dictionary": "^5.8.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

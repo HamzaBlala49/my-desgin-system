@@ -1,0 +1,9 @@
+node_modules
+.turbo
+dist
+storybook-static
+coverage
+pnpm-lock.yaml
+*.tsbuildinfo
+packages/tokens/tokens/studio
+packages/tokens/tokens/studio.tokens.json

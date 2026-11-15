@@ -1,14 +1,15 @@
-import { dirname, join, resolve } from "path";
+import { dirname, join } from "node:path";
 
 function getAbsolutePath(value) {
   return dirname(require.resolve(join(value, "package.json")));
 }
 
 const config = {
-  stories: ["../stories/*.stories.tsx", "../stories/**/*.stories.tsx"],
+  stories: ["../stories/**/*.stories.tsx"],
   addons: [
     getAbsolutePath("@storybook/addon-links"),
     getAbsolutePath("@storybook/addon-essentials"),
+    getAbsolutePath("@storybook/addon-a11y"),
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
@@ -17,19 +18,10 @@ const config = {
 
   core: {},
 
-  async viteFinal(config, { configType }) {
-    // customize the Vite config here
+  async viteFinal(config) {
     return {
       ...config,
-      define: { "process.env": {} },
-      resolve: {
-        alias: [
-          {
-            find: "ui",
-            replacement: resolve(__dirname, "../../../packages/ui/"),
-          },
-        ],
-      },
+      define: { ...config.define, "process.env": {} },
     };
   },
 

@@ -1,208 +1,303 @@
-# Turborepo Design System Starter
+# Design System
 
-This is a community-maintained example. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+A token-driven design system monorepo built with:
 
-This guide explains how to use a React design system starter powered by:
+- [Turborepo](https://turborepo.dev) — monorepo task orchestration and caching
+- [Style Dictionary](https://styledictionary.com) — token transformation
+- [Tokens Studio](https://tokens.studio) — Figma token sync
+- [Radix Colors](https://www.radix-ui.com/colors) — accessible primitive color scales
+- [Radix UI](https://www.radix-ui.com/primitives) — accessible primitives
+- [Tailwind CSS v4](https://tailwindcss.com) — CSS-first styling
+- [Storybook](https://storybook.js.org) — component documentation
+- [Vitest](https://vitest.dev) + Testing Library + jest-axe — behavior and a11y tests
+- [Changesets](https://github.com/changesets/changesets) — versioning and publishing
 
-- 🏎 [Turborepo](https://turborepo.dev) — High-performance build system for Monorepos
-- 🚀 [React](https://reactjs.org/) — JavaScript library for user interfaces
-- 🛠 [Tsup](https://github.com/egoist/tsup) — TypeScript bundler powered by esbuild
-- 📖 [Storybook](https://storybook.js.org/) — UI component environment powered by Vite
+## Repository structure
 
-As well as a few others tools preconfigured:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-- [Changesets](https://github.com/changesets/changesets) for managing versioning and changelogs
-- [GitHub Actions](https://github.com/changesets/action) for fully automated package publishing
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest -e design-system
+```text
+.
+├── apps/
+│   ├── docs/                      # @repo/docs — Storybook docs
+│   └── playground/                # @repo/playground — consumer playground
+├── packages/
+│   ├── tokens/                    # @repo/tokens — token pipeline
+│   │   ├── tokens/
+│   │   │   ├── core/              # primitive tokens (color, space, radius, typography, shadow)
+│   │   │   ├── semantic/          # semantic aliases used by components
+│   │   │   └── themes/dark/       # dark theme overrides
+│   │   ├── scripts/sync-radix.mjs # generates primitive colors from @radix-ui/colors
+│   │   └── build.mjs              # Style Dictionary build
+│   ├── ui/                        # @repo/ui — components
+│   │   ├── src/components/
+│   │   ├── src/lib/cn.ts
+│   │   └── src/styles.css
+│   ├── eslint-config/
+│   └── typescript-config/
+├── .changeset/
+├── .github/workflows/
+├── turbo.json
+└── package.json
 ```
 
-### Useful Commands
+## Requirements
 
-- `pnpm build` - Build all packages, including the Storybook site
-- `pnpm dev` - Run all packages locally and preview with Storybook
-- `pnpm lint` - Lint all packages
-- `pnpm changeset` - Generate a changeset
-- `pnpm clean` - Clean up all `node_modules` and `dist` folders (runs each package's clean script)
+- Node.js >= 22.12.0
+- pnpm 8.15.6 (`corepack enable`)
 
-## Turborepo
-
-[Turborepo](https://turborepo.dev) is the build system for coding agents. It was designed after the workflows used by massive software engineering organizations to ship code at scale. Turborepo abstracts the complex configuration needed for monorepos and provides fast, incremental builds with zero-configuration remote caching.
-
-Using Turborepo simplifies managing your design system monorepo, as you can have a single lint, build, test, and release process for all packages. [Learn more](https://vercel.com/blog/monorepos-are-changing-how-teams-build-software) about how monorepos improve your development workflow.
-
-## Apps & Packages
-
-This Turborepo includes the following packages and applications:
-
-- `apps/docs`: Component documentation site with Storybook
-- `packages/ui`: Core React components
-- `packages/typescript-config`: Shared `tsconfig.json`s used throughout the Turborepo
-- `packages/eslint-config`: ESLint preset
-
-Each package and app is 100% [TypeScript](https://www.typescriptlang.org/). Workspaces enables us to "hoist" dependencies that are shared between packages to the root `package.json`. This means smaller `node_modules` folders and a better local dev experience. To install a dependency for the entire monorepo, use the `-w` workspaces flag with `pnpm add`.
-
-This example sets up your `.gitignore` to exclude all generated files, other folders like `node_modules` used to store your dependencies.
-
-### Compilation
-
-To make the ui library code work across all browsers, we need to compile the raw TypeScript and React code to plain JavaScript. We can accomplish this with `tsup`, which uses `esbuild` to greatly improve performance.
-
-Running `pnpm build` from the root of the Turborepo will run the `build` command defined in each package's `package.json` file. Turborepo runs each `build` in parallel and caches & hashes the output to speed up future builds.
-
-For `@acme/ui`, the `build` command is equivalent to the following:
+## Getting started
 
 ```bash
-tsup src/*.tsx --format esm,cjs --dts --external react
+pnpm install
+pnpm build
+pnpm dev
 ```
 
-`tsup` compiles all of the components in the design system individually, into both ES Modules and CommonJS formats as well as their TypeScript types. The `package.json` for `@acme/ui` then instructs the consumer to select the correct format:
+`pnpm dev` runs Storybook at `http://localhost:6006` and the playground at
+`http://localhost:5173`.
 
-```json:ui/package.json
-{
-  "name": "@acme/ui",
-  "version": "0.0.0",
-  "sideEffects": false,
-  "exports":{
-    "./button": {
-      "types": "./src/button.tsx",
-      "import": "./dist/button.mjs",
-      "require": "./dist/button.js"
-    }
-  }
-}
+### Commands
+
+| Command            | Description                                     |
+| ------------------ | ----------------------------------------------- |
+| `pnpm dev`         | Run Storybook, playground, and package watchers |
+| `pnpm build`       | Build tokens, components, docs, and playground  |
+| `pnpm lint`        | Lint all packages                               |
+| `pnpm typecheck`   | Typecheck all packages                          |
+| `pnpm test`        | Run Vitest + Testing Library + jest-axe         |
+| `pnpm tokens`      | Build tokens only                               |
+| `pnpm sync:tokens` | Regenerate primitive colors from Radix Colors   |
+| `pnpm changeset`   | Create a changeset                              |
+| `pnpm release`     | Build and publish via Changesets                |
+| `pnpm format`      | Format with Prettier                            |
+
+## Token architecture
+
+Tokens are split into three levels:
+
+1. **Primitive (`core`)** — raw values such as `core.color.gray.1`,
+   `core.space.4`, `core.radius.md`.
+2. **Semantic (`semantic`)** — product decisions such as
+   `semantic.color.surface.canvas`, `semantic.color.content.primary`,
+   `semantic.color.accent.solid`.
+3. **Component (optional)** — component-specific tokens when a semantic token
+   is not enough.
+
+Components must only use semantic tokens.
+
+### Generated outputs
+
+`pnpm --filter @repo/tokens build` produces:
+
+```text
+packages/tokens/dist/
+├── variables.css   # --ds-* CSS variables for :root and [data-theme="dark"]
+├── tailwind.css    # @theme inline mapping to Tailwind v4 namespaces
+├── tokens.json     # flattened resolved tokens
+├── tokens.mjs      # ESM
+├── tokens.cjs      # CommonJS
+└── tokens.d.ts     # types
 ```
 
-Run `pnpm build` to confirm compilation is working correctly. You should see a folder `ui/dist` which contains the compiled output.
+The CSS variable prefix is `--ds-` to avoid collisions with consumers.
+
+### Primitive colors
+
+Primitive colors are generated from [`@radix-ui/colors`](https://www.radix-ui.com/colors)
+(MIT). To regenerate them:
 
 ```bash
-ui
-└── dist
-    ├── button.d.ts  <-- Types
-    ├── button.js    <-- CommonJS version
-    ├── button.mjs   <-- ES Modules version
-    └── button.d.mts   <-- ES Modules version with Types
+pnpm sync:tokens
+pnpm tokens
 ```
 
-## Components
+The generator writes both light and dark scales. Dark mode overrides the same
+token paths, so semantic aliases resolve to the correct theme automatically.
 
-Each file inside of `ui/src` is a component inside our design system. For example:
+### Using tokens with Tailwind v4
 
-```tsx:ui/src/Button.tsx
-import * as React from 'react';
+`@repo/tokens/tailwind.css` maps semantic tokens into Tailwind namespaces:
 
-export interface ButtonProps {
-  children: React.ReactNode;
+```css
+@import "tailwindcss";
+@import "@repo/tokens/tailwind.css";
+
+@source "./src/**/*.{ts,tsx}";
+```
+
+Semantic tokens become utilities:
+
+- `bg-surface-canvas`, `bg-surface-raised`
+- `text-content-primary`, `text-content-secondary`
+- `border-stroke-default`
+- `bg-accent`, `hover:bg-accent-hover`, `text-accent-contrast`
+- `ring-focus`
+- `rounded-md`, `shadow-sm`, `text-sm`, `font-medium`
+
+### Theme switching
+
+The token package ships light variables on `:root` and dark overrides on
+`[data-theme="dark"]` and `.dark`.
+
+```ts
+document.documentElement.dataset.theme = "dark";
+```
+
+RTL is supported through logical properties (`ps-*`, `pe-*`, `ms-*`, `me-*`,
+`text-start`, `end-*`):
+
+```ts
+document.documentElement.dir = "rtl";
+```
+
+## Figma → Tokens Studio → GitHub
+
+1. Create a free Figma account and duplicate a community kit for visual
+   reference. This project uses **Untitled UI Free** as a visual reference only;
+   the Figma file is not redistributed.
+2. Install the free **Tokens Studio for Figma** plugin.
+3. Create token sets with these names:
+   - `core` — contains `color`, `space`, `radius`, `typography`, `shadow`
+   - `semantic` — contains `color`
+   - `dark` — optional, only for the Pro multi-file/themes workflow
+4. In GitHub, create a **Personal Access Token**:
+   - Classic token with the `repo` scope, or
+   - Fine-grained token with **Contents: Read and write**.
+5. In Figma, open **Tokens Studio → Settings → Sync providers → Add new →
+   GitHub** and fill the form:
+   - **Name**: `design-system-tokens`
+   - **Personal access token**: the token from step 4
+   - **Repository (owner/repo)**: e.g. `your-user/my-desgin-system`
+   - **Branch**: `main` (or a feature branch)
+   - **Token storage location (file/folder path)**:
+     - **Free plan (single file)**:
+       `packages/tokens/tokens/studio.tokens.json`
+     - **Pro plan (multi-file)**:
+       `packages/tokens/tokens/studio`
+   - **Base URL**: leave empty for github.com
+6. Save, then choose **Push** (not Pull) in the sync modal.
+
+The build script auto-detects the storage mode:
+
+| Mode               | Plugin path                                 | Files used by the build                                              |
+| ------------------ | ------------------------------------------- | -------------------------------------------------------------------- |
+| Single file (free) | `packages/tokens/tokens/studio.tokens.json` | that file as the light tokens                                        |
+| Multi-file (Pro)   | `packages/tokens/tokens/studio`             | every JSON file; files with `dark` in the name become dark overrides |
+| Manual fallback    | —                                           | `tokens/core/*`, `tokens/semantic/*`, `tokens/themes/dark/*`         |
+
+The console output confirms the detected mode:
+
+```text
+Built @repo/tokens (light: studio-file, dark: manual) → ...
+```
+
+> **Important:** keep the top-level groups `core.*` and `semantic.*` in the
+> Figma sets. The Tailwind mapping and the dark overrides depend on those paths.
+> On the free plan, Tokens Studio merges all sets into one file and can only
+> represent one theme; keep the dark overrides in
+> `packages/tokens/tokens/themes/dark/` (already generated from Radix Colors).
+> Full light/dark theme automation requires the Pro multi-file workflow.
+
+7. The `Tokens` GitHub Actions workflow validates the build and uploads the
+   generated `dist` artifact. `dist` is never committed; it is produced by CI
+   and before publishing.
+
+## Consuming `@repo/ui`
+
+### With the precompiled CSS (recommended)
+
+```tsx
+import { Button, Card, Input } from "@repo/ui";
+import "@repo/ui/styles.css";
+
+export function Example() {
+  return (
+    <Card>
+      <Input placeholder="Email" />
+      <Button>Save</Button>
+    </Card>
+  );
 }
-
-export function Button(props: ButtonProps) {
-  return <button>{props.children}</button>;
-}
-
-Button.displayName = 'Button';
 ```
 
-When adding a new file, ensure that its specifier is defined in `package.json` file:
+The compiled `@repo/ui/styles.css` includes the token variables and all
+utilities used by the components. It does **not** include Tailwind preflight, so
+the consumer controls the reset. The consumer does not need Tailwind installed.
 
-```json:ui/package.json
-{
-  "name": "@acme/ui",
-  "version": "0.0.0",
-  "sideEffects": false,
-  "exports":{
-    "./button": {
-      "types": "./src/button.tsx",
-      "import": "./dist/button.mjs",
-      "require": "./dist/button.js"
-    }
-    // Add new component exports here
-  }
-}
+### Tailwind-native consumers
+
+If your app also uses Tailwind v4, import the token theme and scan this package's
+source:
+
+```css
+@import "tailwindcss";
+@import "@repo/tokens/tailwind.css";
+
+@source "../node_modules/@repo/ui/dist";
 ```
 
-## Storybook
+## Adding a component
 
-Storybook provides us with an interactive UI playground for our components. This allows us to preview our components in the browser and instantly see changes when developing locally. This example preconfigures Storybook to:
+1. Create `packages/ui/src/components/<name>/`:
+   - `<name>.tsx`
+   - `index.ts`
+   - `<name>.test.tsx`
+2. Use `React.forwardRef`, `cn`, and `cva` for variants.
+3. Use semantic tokens only (`bg-accent`, `text-content-primary`, ...).
+4. Use logical properties for RTL (`ps-*`, `pe-*`, `ms-*`, `me-*`).
+5. Add the entry to `packages/ui/tsup.config.ts`.
+6. Add the export to `packages/ui/package.json` and `packages/ui/src/index.ts`.
+7. Add a story under `apps/docs/stories/components/`.
+8. Add tests, including an axe assertion.
 
-- Use Vite to bundle stories instantly (in milliseconds)
-- Automatically find any stories inside the `stories/` folder
-- Support using module path aliases like `@acme/ui` for imports
-- Write MDX for component documentation pages
+## Component API notes
 
-For example, here's the included Story for our `Button` component:
+- **Button** — `variant`, `size`, `asChild`, `isLoading`, `disabled`.
+- **Input** — `invalid`.
+- **Label** — `required`.
+- **Checkbox** — Radix Checkbox, supports `checked="indeterminate"`.
+- **Badge** — `variant`, `size`.
+- **Card** — composable `CardHeader`, `CardTitle`, `CardDescription`,
+  `CardContent`, `CardFooter`.
+- **Dialog** — Radix Dialog with overlay, content, header, footer, title,
+  description, and close.
+- **Select** — Radix Select with groups, labels, separators, and scroll buttons.
+- **Tabs** — Radix Tabs with list, trigger, and content.
 
-```js:apps/docs/stories/button.stories.mdx
-import { Button } from '@acme/ui/button';
-import { Meta, Story, Preview, Props } from '@storybook/addon-docs/blocks';
+## Styling rules
 
-<Meta title="Components/Button" component={Button} />
+1. Never use raw hex values in components.
+2. Never build Tailwind class names dynamically (`bg-${color}`); use static maps
+   or `cva`.
+3. Use semantic tokens only; primitives are for semantic aliases.
+4. Use logical properties so RTL works without overrides.
+5. Do not add global CSS resets to the component package.
+6. Keep `sideEffects` including `**/*.css`.
 
-# Button
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget consectetur tempor, nisl nunc egestas nisi, euismod aliquam nisl nunc euismod.
-
-## Props
-
-<Props of={Box} />
-
-## Examples
-
-<Preview>
-  <Story name="Default">
-    <Button>Hello</Button>
-  </Story>
-</Preview>
-```
-
-This example includes a few helpful Storybook scripts:
-
-- `pnpm dev`: Starts Storybook in dev mode with hot reloading at `localhost:6006`
-- `pnpm build`: Builds the Storybook UI and generates the static HTML files
-- `pnpm preview-storybook`: Starts a local server to view the generated Storybook UI
-
-## Versioning & Publishing Packages
-
-This example uses [Changesets](https://github.com/changesets/changesets) to manage versions, create changelogs, and publish to npm. It's preconfigured so you can start publishing packages immediately.
-
-You'll need to create an `NPM_TOKEN` and `GITHUB_TOKEN` and add it to your GitHub repository settings to enable access to npm. It's also worth installing the [Changesets bot](https://github.com/apps/changeset-bot) on your repository.
-
-### Generating the Changelog
-
-To generate your changelog, run `pnpm changeset` locally:
-
-1. **Which packages would you like to include?** – This shows which packages and changed and which have remained the same. By default, no packages are included. Press `space` to select the packages you want to include in the `changeset`.
-1. **Which packages should have a major bump?** – Press `space` to select the packages you want to bump versions for.
-1. If doing the first major version, confirm you want to release.
-1. Write a summary for the changes.
-1. Confirm the changeset looks as expected.
-1. A new Markdown file will be created in the `changeset` folder with the summary and a list of the packages included.
-
-### Releasing
-
-When you push your code to GitHub, the [GitHub Action](https://github.com/changesets/action) will run the `release` script defined in the root `package.json`:
+## Testing
 
 ```bash
-turbo run build --filter=docs^... && changeset publish
+pnpm test
 ```
 
-Turborepo runs the `build` script for all publishable packages (excluding docs) and publishes the packages to npm. By default, this example includes `acme` as the npm organization. To change this, do the following:
+Each component has behavior tests and an accessibility test using `jest-axe`.
+Storybook also runs the a11y addon, and `parameters.a11y.test = "error"` makes
+the test runner fail on violations.
 
-- Rename folders in `packages/*` to replace `acme` with your desired scope
-- Search and replace `acme` with your desired scope
-- Re-run `pnpm install`
+## Releasing
 
-To publish packages to a private npm organization scope, **remove** the following from each of the `package.json`'s
-
-```diff
-- "publishConfig": {
--  "access": "public"
-- },
+```bash
+pnpm changeset
+pnpm version-packages
+pnpm release
 ```
+
+Publishing is handled by the `Release` GitHub Actions workflow using
+Changesets. Add `NPM_TOKEN` and `GITHUB_TOKEN` to the repository secrets.
+
+## Attribution
+
+- Primitive colors: [Radix Colors](https://github.com/radix-ui/colors), MIT.
+  See `packages/tokens/THIRD_PARTY_LICENSES.md`.
+- Visual reference: [Untitled UI Free](https://www.untitledui.com/), used as a
+  reference only and not redistributed.
+- The project does not use shadcn/ui tokens or configuration.
