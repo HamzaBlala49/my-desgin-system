@@ -1,0 +1,2061 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monorepo &amp; Design System — Tech Session</title>
+    <meta
+      name="description"
+      content="A practical session on Turborepo, token architecture, Figma sync, and component usage."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Monorepo <span class="brand-x">×</span> Design System</span>
+        </div>
+        <div class="controls">
+          <button class="icon-btn" id="outlineBtn" type="button" title="Outline (O)" aria-label="Open outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" rx="1.6" />
+              <rect x="14" y="3" width="7" height="7" rx="1.6" />
+              <rect x="3" y="14" width="7" height="7" rx="1.6" />
+              <rect x="14" y="14" width="7" height="7" rx="1.6" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="notesBtn" type="button" title="Speaker notes (N)" aria-label="Toggle speaker notes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M6 3.5h12a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 19V5A1.5 1.5 0 0 1 6 3.5Z" />
+              <path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="themeBtn" type="button" title="Switch theme (T)" aria-label="Switch color theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round" />
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M20 14.5A8 8 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="fullscreenBtn" type="button" title="Fullscreen (F)" aria-label="Toggle fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="viewport" id="viewport">
+        <div class="stage" id="stage">
+          <!-- 01 · TITLE -->
+          <section class="slide slide--title is-active" data-part="Intro" data-title="Monorepo &amp; Design System">
+            <div class="title-grid">
+              <div class="title-copy">
+                <div class="eyebrow">Tech session · 2026</div>
+                <h1 class="hero-title">
+                  Monorepo<br />
+                  <span class="hero-amp">&amp;</span> Design<br />
+                  System
+                </h1>
+                <p class="hero-lead">
+                  One repository. One token pipeline. One source of truth for design and code.
+                </p>
+                <div class="meta-row">
+                  <span class="pill pill--accent">Turborepo</span>
+                  <span class="pill">pnpm</span>
+                  <span class="pill">Tokens Studio</span>
+                  <span class="pill">Tailwind v4</span>
+                </div>
+                <div class="key-hint">
+                  <kbd>←</kbd><kbd>→</kbd> to move
+                  <span class="hint-dot"></span>
+                  <kbd>O</kbd> outline
+                  <span class="hint-dot"></span>
+                  <kbd>N</kbd> notes
+                </div>
+              </div>
+
+              <div class="title-art" aria-hidden="true">
+                <div class="art-card art-card--palette">
+                  <div class="art-label">primitive · indigo</div>
+                  <div class="swatch-mini-row">
+                    <div class="swatch-mini" style="background:#eef2ff"><span>50</span></div>
+                    <div class="swatch-mini" style="background:#c7d2fe"><span>200</span></div>
+                    <div class="swatch-mini" style="background:#818cf8"><span>400</span></div>
+                    <div class="swatch-mini swatch-mini--active" style="background:#4338ca"><span>700</span></div>
+                    <div class="swatch-mini" style="background:#312e81"><span>900</span></div>
+                  </div>
+                  <div class="art-code">--ds-color-indigo-700</div>
+                </div>
+
+                <div class="art-card art-card--ui">
+                  <div class="art-label">@repo/ui · card</div>
+                  <div class="fake-title">A small system</div>
+                  <div class="fake-lines">
+                    <span style="width:92%"></span>
+                    <span style="width:74%"></span>
+                  </div>
+                  <div class="fake-input">hello@studio.dev</div>
+                  <div class="fake-row">
+                    <span class="fake-btn">Ship it <span>→</span></span>
+                    <span class="fake-badge">stable</span>
+                  </div>
+                </div>
+
+                <div class="art-tag">semantic.color.accent.solid</div>
+              </div>
+            </div>
+            <aside class="notes">
+              Welcome. This session connects two topics people often learn separately: how to run a
+              monorepo, and how to build a token-driven design system. The thread is simple: the repo
+              is the delivery mechanism, and tokens are the contract.
+            </aside>
+          </section>
+
+          <!-- 02 · AGENDA -->
+          <section class="slide" data-part="Intro" data-title="Today’s map">
+            <div class="eyebrow">Today’s map</div>
+            <h2 class="slide-title">Two parts. <em>One thread.</em></h2>
+            <p class="lead">First the repo. Then the design system it carries.</p>
+
+            <div class="content">
+              <div class="agenda-grid">
+                <article class="agenda-card">
+                  <div class="agenda-top">
+                    <span class="agenda-num">01</span>
+                    <span class="pill pill--accent">~20 min</span>
+                  </div>
+                  <h3>Monorepo</h3>
+                  <p>The repo as a system: structure, task graph, cache, and strategy.</p>
+                  <ul class="tick-list">
+                    <li>Why one repo, and what it costs</li>
+                    <li>Nx vs Turborepo — and our choice</li>
+                    <li>Parallel builds and caching</li>
+                    <li>Workspace vs backend strategy</li>
+                  </ul>
+                </article>
+
+                <div class="agenda-connector" aria-hidden="true">
+                  <span>then</span>
+                  <div class="connector-line"></div>
+                </div>
+
+                <article class="agenda-card">
+                  <div class="agenda-top">
+                    <span class="agenda-num">02</span>
+                    <span class="pill">~25 min</span>
+                  </div>
+                  <h3>Design system</h3>
+                  <p>The token contract: three tiers, Figma sync, CI, and components.</p>
+                  <ul class="tick-list">
+                    <li>Primitive, semantic, component tokens</li>
+                    <li>Naming rules that scale</li>
+                    <li>Figma → GitHub → code</li>
+                    <li>Using tokens inside the monorepo</li>
+                  </ul>
+                </article>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>By the end:</strong> you can trace one design decision from Figma to a button in production.</p>
+            </div>
+            <aside class="notes">
+              Two parts. First the repo: why it exists, how Turborepo runs it, and the strategy choices.
+              Then the design system: tokens, naming, Figma sync, CI, and component usage. The order
+              matters because the design system needs a reliable delivery mechanism.
+            </aside>
+          </section>
+
+          <!-- 03 · SECTION 1 -->
+          <section class="slide slide--section" data-part="Part 01" data-title="Monorepo">
+            <div class="section-watermark" aria-hidden="true">01</div>
+            <div class="section-inner">
+              <div class="eyebrow eyebrow--light">Part 01 · Monorepo</div>
+              <h2 class="section-title">Many packages.<br /><em>One repository.</em></h2>
+              <p class="section-lead">
+                Start with the coordination problem. Then build the smallest Turborepo that solves it.
+              </p>
+              <div class="section-topics">
+                <span>structure</span>
+                <span>task graph</span>
+                <span>cache</span>
+                <span>strategy</span>
+              </div>
+            </div>
+            <aside class="notes">
+              Part 1. We start from the problem, not the tool. By the end of this part you should be able
+              to explain what Turborepo does, and what it does not do.
+            </aside>
+          </section>
+
+          <!-- 04 · THE PROBLEM -->
+          <section class="slide" data-part="Part 01" data-title="The problem: five repos, five versions">
+            <div class="eyebrow">The problem</div>
+            <h2 class="slide-title">Five repos. Five versions. <em>Zero sync.</em></h2>
+            <p class="lead">A small token change becomes a coordination project.</p>
+
+            <div class="content">
+              <div class="before-after">
+                <div class="panel panel--bad">
+                  <div class="panel-head">
+                    <span class="tag tag--bad">Before</span>
+                    <span class="panel-meta">polyrepo</span>
+                  </div>
+                  <div class="repo-cloud">
+                    <div class="repo-chip">ui<small>v0.4</small></div>
+                    <div class="repo-chip">tokens<small>v0.7</small></div>
+                    <div class="repo-chip">docs<small>v0.3</small></div>
+                    <div class="repo-chip">app<small>v0.6</small></div>
+                    <div class="repo-chip">config<small>v1.2</small></div>
+                  </div>
+                  <div class="alert-line"><span>!</span> Token change = 5 PRs, 5 reviews, 5 releases.</div>
+                </div>
+
+                <div class="panel panel--good">
+                  <div class="panel-head">
+                    <span class="tag tag--good">After</span>
+                    <span class="panel-meta">monorepo</span>
+                  </div>
+                  <div class="repo-box">
+                    <div class="repo-box-label">one git history</div>
+                    <div class="repo-box-grid">
+                      <div class="repo-chip">packages/ui</div>
+                      <div class="repo-chip">packages/tokens</div>
+                      <div class="repo-chip">apps/docs</div>
+                      <div class="repo-chip">apps/app</div>
+                      <div class="repo-chip">packages/config</div>
+                      <div class="repo-chip repo-chip--ghost">workspace:*</div>
+                    </div>
+                  </div>
+                  <div class="ok-line"><span>✓</span> One PR. One version. One build.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>The real problem is not code.</strong> It is coordination between code that must change together.</p>
+            </div>
+            <aside class="notes">
+              Ask the room: who has waited for a token change to land in five repositories? That is the
+              pain we are solving. The problem is not writing the CSS; it is coordinating five versions
+              of the same decision.
+            </aside>
+          </section>
+
+          <!-- 05 · WHAT A MONOREPO IS -->
+          <section class="slide" data-part="Part 01" data-title="What a monorepo is — and is not">
+            <div class="eyebrow">Definition</div>
+            <h2 class="slide-title">What a monorepo is — <em>and is not.</em></h2>
+
+            <div class="content">
+              <div class="definition">
+                <span class="quote-mark" aria-hidden="true">“</span>
+                <p>
+                  A monorepo is <strong>one repository</strong> that holds
+                  <strong>many independent packages and apps</strong>.
+                </p>
+              </div>
+
+              <div class="grid-2 definition-grid">
+                <div class="card card--good">
+                  <div class="card-kicker">It is</div>
+                  <ul class="tick-list">
+                    <li>One git history and one lockfile</li>
+                    <li>Explicit package boundaries</li>
+                    <li>Shared tooling and standards</li>
+                    <li>Atomic commits across packages</li>
+                  </ul>
+                </div>
+                <div class="card card--bad">
+                  <div class="card-kicker">It is not</div>
+                  <ul class="cross-list">
+                    <li>One giant package</li>
+                    <li>A flat folder with no rules</li>
+                    <li>Automatic good architecture</li>
+                    <li>The right choice for every team</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Boundaries are the product.</strong> The repository is just the container.</p>
+            </div>
+            <aside class="notes">
+              Clarify the definition early. A monorepo is not "put everything in one folder". It is one
+              history with clear package boundaries. The boundaries are what make it manageable.
+            </aside>
+          </section>
+
+          <!-- 06 · WHAT IT SOLVES -->
+          <section class="slide" data-part="Part 01" data-title="What a monorepo solves">
+            <div class="eyebrow">Benefits</div>
+            <h2 class="slide-title">What it solves</h2>
+            <p class="lead">Mostly coordination problems — not code problems.</p>
+
+            <div class="content">
+              <div class="benefit-grid">
+                <article class="benefit">
+                  <span class="benefit-num">01</span>
+                  <h3>Atomic changes</h3>
+                  <p>Token, component, story, and test change in one pull request.</p>
+                </article>
+                <article class="benefit">
+                  <span class="benefit-num">02</span>
+                  <h3>One install</h3>
+                  <p>One lockfile and one dependency graph for the whole system.</p>
+                </article>
+                <article class="benefit">
+                  <span class="benefit-num">03</span>
+                  <h3>Shared config</h3>
+                  <p>ESLint, TypeScript, and build settings live in shared packages.</p>
+                </article>
+                <article class="benefit">
+                  <span class="benefit-num">04</span>
+                  <h3>No version skew</h3>
+                  <p>Internal packages always resolve to the local source.</p>
+                </article>
+                <article class="benefit">
+                  <span class="benefit-num">05</span>
+                  <h3>Fast CI</h3>
+                  <p>Only affected work runs — when the graph and cache are set up.</p>
+                </article>
+                <article class="benefit">
+                  <span class="benefit-num">06</span>
+                  <h3>Easy onboarding</h3>
+                  <p>One clone. One command. Every package is discoverable.</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>The win is leverage:</strong> one change can safely reach every consumer.</p>
+            </div>
+            <aside class="notes">
+              Notice that five of these six are coordination wins, not code wins. Faster CI is the only
+              one that depends on how well we configure the tool. The rest come from the structure.
+            </aside>
+          </section>
+
+          <!-- 07 · WHAT IT DOESN'T SOLVE -->
+          <section class="slide" data-part="Part 01" data-title="What it does not solve">
+            <div class="eyebrow">Trade-offs</div>
+            <h2 class="slide-title">What it does not solve</h2>
+            <p class="lead">Every benefit has a maintenance cost. Name it, then control it.</p>
+
+            <div class="content">
+              <div class="matrix">
+                <div class="matrix-head">
+                  <span>Cost</span><span></span><span>Control</span>
+                </div>
+                <div class="matrix-row">
+                  <span>Boundaries are optional</span><span class="matrix-arrow">→</span><span>Public <code>exports</code> + lint rules</span>
+                </div>
+                <div class="matrix-row">
+                  <span>CI gets bigger</span><span class="matrix-arrow">→</span><span>Task graph + caching + filters</span>
+                </div>
+                <div class="matrix-row">
+                  <span>Ownership gets blurry</span><span class="matrix-arrow">→</span><span>CODEOWNERS + clear package owners</span>
+                </div>
+                <div class="matrix-row">
+                  <span>One toolchain for everyone</span><span class="matrix-arrow">→</span><span>Pin Node and pnpm at the root</span>
+                </div>
+                <div class="matrix-row">
+                  <span>Clone and install grow</span><span class="matrix-arrow">→</span><span>Shallow CI clones + filtered commands</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>A monorepo is not automatically faster or cleaner.</strong> It is only as good as its rules.</p>
+            </div>
+            <aside class="notes">
+              Be honest about the cost. This slide sets up the rest of Part 1: the task graph and cache
+              are how we control CI time; boundaries and ownership are how we control the codebase.
+            </aside>
+          </section>
+
+          <!-- 08 · NX VS TURBO -->
+          <section class="slide" data-part="Part 01" data-title="Nx vs Turborepo">
+            <div class="eyebrow">Tool choice</div>
+            <h2 class="slide-title">Nx or Turborepo?</h2>
+            <p class="lead">Both are good. Choose by constraints, not by hype.</p>
+
+            <div class="content">
+              <div class="vs">
+                <div class="vs-row vs-head">
+                  <span>Dimension</span>
+                  <span>Nx</span>
+                  <span class="win">Turborepo</span>
+                </div>
+                <div class="vs-row">
+                  <span>Scope</span><span>Full platform</span><span class="win">Focused task runner</span>
+                </div>
+                <div class="vs-row">
+                  <span>Task graph</span><span>Yes</span><span class="win">Yes</span>
+                </div>
+                <div class="vs-row">
+                  <span>Generators</span><span>Built-in, powerful</span><span class="win">Optional, lighter</span>
+                </div>
+                <div class="vs-row">
+                  <span>Module boundaries</span><span>Enforced</span><span class="win">By convention + lint</span>
+                </div>
+                <div class="vs-row">
+                  <span>Remote cache</span><span>Nx Cloud</span><span class="win">Vercel or self-hosted</span>
+                </div>
+                <div class="vs-row">
+                  <span>Learning curve</span><span>Steeper</span><span class="win">Small</span>
+                </div>
+                <div class="vs-row">
+                  <span>Best fit</span><span>Large org, many stacks</span><span class="win">JS/TS product teams</span>
+                </div>
+              </div>
+
+              <div class="decision">
+                <span class="decision-badge">Our choice</span>
+                <p>
+                  <strong>Turborepo.</strong> pnpm-native, about 30 lines of config, and enough for this
+                  design system. Nx is the better answer when you need generators and enforced boundaries at scale.
+                </p>
+              </div>
+            </div>
+            <aside class="notes">
+              Avoid the tool war. Nx is excellent for large organisations that need generators, plugins,
+              and enforced module boundaries. This repo is a focused TypeScript product monorepo, so
+              Turborepo gives us the speed with much less ceremony.
+            </aside>
+          </section>
+
+          <!-- 09 · THREE IDEAS -->
+          <section class="slide" data-part="Part 01" data-title="Turborepo in three ideas">
+            <div class="eyebrow">Mental model</div>
+            <h2 class="slide-title">Turborepo in <em>three ideas</em></h2>
+            <p class="lead">Everything else is detail.</p>
+
+            <div class="content">
+              <div class="three-flow">
+                <article class="flow-card">
+                  <span class="flow-num">01</span>
+                  <h3>Workspace</h3>
+                  <p class="flow-q">What is a package?</p>
+                  <p>pnpm reads the folders and links them locally.</p>
+                  <code class="inline-code">pnpm-workspace.yaml</code>
+                </article>
+
+                <div class="flow-arrow" aria-hidden="true">→</div>
+
+                <article class="flow-card">
+                  <span class="flow-num">02</span>
+                  <h3>Pipeline</h3>
+                  <p class="flow-q">What runs, in what order?</p>
+                  <p><code>turbo.json</code> declares tasks and dependencies.</p>
+                  <code class="inline-code">dependsOn: ["^build"]</code>
+                </article>
+
+                <div class="flow-arrow" aria-hidden="true">→</div>
+
+                <article class="flow-card">
+                  <span class="flow-num">03</span>
+                  <h3>Cache</h3>
+                  <p class="flow-q">What can we skip?</p>
+                  <p>Turborepo hashes inputs and replays declared outputs.</p>
+                  <code class="inline-code">.turbo/cache</code>
+                </article>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Package manager + task graph + content cache.</strong> That is the whole system.</p>
+            </div>
+            <aside class="notes">
+              If you remember one slide from Part 1, this is it. pnpm defines the workspace. turbo.json
+              defines the graph. The cache memoizes tasks. Every feature in Turborepo builds on these
+              three ideas.
+            </aside>
+          </section>
+
+          <!-- 10 · STRUCTURE -->
+          <section class="slide" data-part="Part 01" data-title="Repository structure">
+            <div class="eyebrow">Structure</div>
+            <h2 class="slide-title">A place for every kind of code</h2>
+            <p class="lead">Apps deploy. Packages are shared. Config is shared once.</p>
+
+            <div class="content">
+              <div class="split split--wide-left">
+                <div class="code-card">
+                  <div class="code-head">
+                    <span class="code-dots"><i></i><i></i><i></i></span>
+                    <span>repository</span>
+                  </div>
+                  <div class="code-body code-tree">
+<span class="tree-file">design-system/</span>
+├── <span class="tree-folder">apps/</span>
+│   ├── <span class="tree-folder">docs/</span>            <span class="tree-comment"># Storybook</span>
+│   └── <span class="tree-folder">playground/</span>      <span class="tree-comment"># Vite consumer</span>
+├── <span class="tree-folder">packages/</span>
+│   ├── <span class="tree-folder">tokens/</span>          <span class="tree-comment"># JSON → CSS / JS</span>
+│   ├── <span class="tree-folder">ui/</span>              <span class="tree-comment"># React components</span>
+│   ├── <span class="tree-folder">eslint-config/</span>   <span class="tree-comment"># shared lint</span>
+│   └── <span class="tree-folder">typescript-config/</span>
+├── <span class="tree-folder">.changeset/</span>
+├── <span class="tree-folder">.github/workflows/</span>
+├── <span class="tree-file">pnpm-workspace.yaml</span>
+├── <span class="tree-file">turbo.json</span>
+└── <span class="tree-file">package.json</span>
+                  </div>
+                </div>
+
+                <div class="note-stack">
+                  <div class="note-item">
+                    <span class="note-num">01</span>
+                    <div><strong><code>apps/*</code> are deployables.</strong><p>Storybook and the playground consume packages. They are leaves in the graph.</p></div>
+                  </div>
+                  <div class="note-item">
+                    <span class="note-num">02</span>
+                    <div><strong><code>packages/*</code> are shared.</strong><p>Tokens, UI, and configs have one owner and one public API.</p></div>
+                  </div>
+                  <div class="note-item">
+                    <span class="note-num">03</span>
+                    <div><strong><code>workspace:*</code> links locally.</strong><p>No publish needed inside the repo. The source is always current.</p></div>
+                  </div>
+                  <div class="note-item">
+                    <span class="note-num">04</span>
+                    <div><strong>One lockfile at the root.</strong><p>One dependency graph, one install, one Node version.</p></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Folder names are architecture.</strong> If the structure is unclear, the dependencies will be too.</p>
+            </div>
+            <aside class="notes">
+              This is the actual repository. Apps are deployables; packages are shared units. The
+              workspace file is only three lines: apps/* and packages/*. Everything else follows from
+              that.
+            </aside>
+          </section>
+
+          <!-- 11 · TASK GRAPH -->
+          <section class="slide" data-part="Part 01" data-title="The task graph">
+            <div class="eyebrow">Pipeline</div>
+            <h2 class="slide-title">The task graph is the build order</h2>
+            <p class="lead">You do not list packages. Turborepo reads their dependencies.</p>
+
+            <div class="content">
+              <div class="split">
+                <div class="graph-wrap">
+                  <div class="graph">
+                    <div class="node node--accent">
+                      @repo/tokens
+                      <small>tokens → CSS / JS</small>
+                    </div>
+                    <div class="graph-arrow">→<small>build</small></div>
+                    <div class="node">
+                      @repo/ui
+                      <small>React components</small>
+                    </div>
+                    <div class="graph-arrow">→<small>build</small></div>
+                    <div class="graph-stack">
+                      <div class="node node--small">
+                        @repo/docs
+                        <small>Storybook</small>
+                      </div>
+                      <div class="node node--small">
+                        @repo/playground
+                        <small>Vite</small>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="graph-caption">Two consumers, one dependency. They can build in parallel.</p>
+                </div>
+
+                <div class="code-card">
+                  <div class="code-head">
+                    <span class="code-dots"><i></i><i></i><i></i></span>
+                    <span>turbo.json</span>
+                  </div>
+                  <div class="code-body">
+<span class="tok-p">{</span>
+  <span class="tok-k">"tasks"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+    <span class="tok-k">"build"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+      <span class="tok-k">"dependsOn"</span><span class="tok-p">:</span> [<span class="tok-s">"^build"</span>]<span class="tok-p">,</span>
+      <span class="tok-k">"outputs"</span><span class="tok-p">:</span> [
+        <span class="tok-s">"dist/**"</span><span class="tok-p">,</span>
+        <span class="tok-s">"storybook-static/**"</span>
+      ]
+    <span class="tok-p">},</span>
+    <span class="tok-k">"dev"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+      <span class="tok-k">"cache"</span><span class="tok-p">:</span> <span class="tok-n">false</span><span class="tok-p">,</span>
+      <span class="tok-k">"persistent"</span><span class="tok-p">:</span> <span class="tok-n">true</span>
+    <span class="tok-p">}</span>
+  <span class="tok-p">}</span>
+<span class="tok-p">}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><code>^build</code> means <strong>“build my dependencies before me.”</strong> One character, the whole graph.</p>
+            </div>
+            <aside class="notes">
+              The caret in ^build means "the same task in my dependencies". Tokens build before UI. UI
+              builds before docs and playground. Turborepo infers the edges from package.json, not from
+              a hand-written list.
+            </aside>
+          </section>
+
+          <!-- 12 · PARALLEL -->
+          <section class="slide" data-part="Part 01" data-title="Parallel execution">
+            <div class="eyebrow">Parallelism</div>
+            <h2 class="slide-title">Parallel where possible. Ordered where necessary.</h2>
+            <p class="lead">The graph decides. You do not micromanage the scheduler.</p>
+
+            <div class="content">
+              <div class="gantt-card">
+                <div class="gantt-head">
+                  <span class="gantt-label">task</span>
+                  <div class="gantt-axis"><span>0s</span><span>3s</span><span>6s</span><span>9s</span><span>12s</span></div>
+                </div>
+                <div class="gantt-row">
+                  <span class="gantt-name">tokens</span>
+                  <div class="gantt-track"><span class="gantt-bar gantt-bar--accent" style="grid-column:1 / span 2">2s</span></div>
+                </div>
+                <div class="gantt-row">
+                  <span class="gantt-name">ui</span>
+                  <div class="gantt-track"><span class="gantt-bar" style="grid-column:3 / span 3">3s</span></div>
+                </div>
+                <div class="gantt-row">
+                  <span class="gantt-name">docs</span>
+                  <div class="gantt-track"><span class="gantt-bar" style="grid-column:6 / span 4">4s</span></div>
+                </div>
+                <div class="gantt-row">
+                  <span class="gantt-name">playground</span>
+                  <div class="gantt-track"><span class="gantt-bar" style="grid-column:6 / span 3">3s</span></div>
+                </div>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat"><strong>12s</strong><span>sequential</span></div>
+                <div class="stat stat--accent"><strong>9s</strong><span>parallel</span></div>
+                <div class="stat"><strong>&lt;1s</strong><span>cache hit</span></div>
+                <p class="stat-note">Same graph. Three different costs.</p>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Parallelism is free</strong> once the dependency edges are honest.</p>
+            </div>
+            <aside class="notes">
+              Tokens must finish before UI. Docs and playground can then run together. This example is
+              deliberately modest: 12 seconds down to 9. The cache is where the order-of-magnitude win
+              appears, and that is the next slide.
+            </aside>
+          </section>
+
+          <!-- 13 · CACHING MODEL -->
+          <section class="slide" data-part="Part 01" data-title="Caching: the mental model">
+            <div class="eyebrow">Caching</div>
+            <h2 class="slide-title">A cache is a <em>memo</em> for tasks</h2>
+            <p class="lead">Same inputs. Same hash. Same result. Skip the work.</p>
+
+            <div class="content">
+              <div class="split split--cache">
+                <div class="formula-card">
+                  <span class="formula-label">cache key</span>
+                  <div class="formula">
+                    <span class="formula-fn">hash</span><span class="formula-paren">(</span>
+                    <div class="formula-items">
+                      <span>task</span><span class="formula-plus">+</span>
+                      <span>inputs</span><span class="formula-plus">+</span>
+                      <span>env</span><span class="formula-plus">+</span>
+                      <span>deps</span>
+                    </div>
+                    <span class="formula-paren">)</span>
+                  </div>
+                  <div class="formula-detail">
+                    <div><span>task</span><strong>command + config</strong></div>
+                    <div><span>inputs</span><strong>files + env</strong></div>
+                    <div><span>deps</span><strong>upstream hashes</strong></div>
+                  </div>
+                  <div class="formula-explain">
+                    <p><strong>Inputs</strong> are files. <strong>Env</strong> is configuration. <strong>Deps</strong> are upstream task hashes.</p>
+                  </div>
+                </div>
+
+                <div class="cache-flow">
+                  <div class="cache-step">turbo run build</div>
+                  <div class="cache-down" aria-hidden="true">↓</div>
+                  <div class="cache-step cache-step--accent">hash the task</div>
+                  <div class="cache-down" aria-hidden="true">↓</div>
+                  <div class="cache-question">seen this exact task before?</div>
+                  <div class="cache-branches">
+                    <div class="cache-branch cache-branch--hit">
+                      <span class="tag tag--good">HIT</span>
+                      <strong>Restore outputs</strong>
+                      <small>milliseconds</small>
+                    </div>
+                    <div class="cache-branch cache-branch--miss">
+                      <span class="tag tag--warn">MISS</span>
+                      <strong>Run the task</strong>
+                      <small>then save outputs</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>The cache does not guess.</strong> It matches content, not timestamps.</p>
+            </div>
+            <aside class="notes">
+              This is memoization for build tasks. If the task definition, the input files, the
+              environment, and the upstream hashes are identical, Turborepo restores the outputs
+              instead of running the task.
+            </aside>
+          </section>
+
+          <!-- 14 · CACHE PRACTICE -->
+          <section class="slide" data-part="Part 01" data-title="Cache in practice">
+            <div class="eyebrow">Caching</div>
+            <h2 class="slide-title">Make the cache <em>trustworthy</em></h2>
+            <p class="lead">A wrong cache is worse than no cache.</p>
+
+            <div class="content">
+              <div class="split split--wide-left">
+                <div class="code-card">
+                  <div class="code-head">
+                    <span class="code-dots"><i></i><i></i><i></i></span>
+                    <span>turbo.json · tasks</span>
+                  </div>
+                  <div class="code-body">
+<span class="tok-p">{</span>
+  <span class="tok-k">"build"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+    <span class="tok-k">"dependsOn"</span><span class="tok-p">:</span> [<span class="tok-s">"^build"</span>]<span class="tok-p">,</span>
+    <span class="tok-k">"inputs"</span><span class="tok-p">:</span> [<span class="tok-s">"$TURBO_DEFAULT$"</span><span class="tok-p">,</span> <span class="tok-s">".env*"</span>]<span class="tok-p">,</span>
+    <span class="tok-k">"outputs"</span><span class="tok-p">:</span> [<span class="tok-s">"dist/**"</span><span class="tok-p">,</span> <span class="tok-s">"storybook-static/**"</span>]
+  <span class="tok-p">},</span>
+  <span class="tok-k">"typecheck"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+    <span class="tok-k">"dependsOn"</span><span class="tok-p">:</span> [<span class="tok-s">"^build"</span>]<span class="tok-p">,</span>
+    <span class="tok-k">"outputs"</span><span class="tok-p">:</span> []
+  <span class="tok-p">},</span>
+  <span class="tok-k">"dev"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+    <span class="tok-k">"cache"</span><span class="tok-p">:</span> <span class="tok-n">false</span><span class="tok-p">,</span>
+    <span class="tok-k">"persistent"</span><span class="tok-p">:</span> <span class="tok-n">true</span>
+  <span class="tok-p">}</span>
+<span class="tok-p">}</span>
+                  </div>
+                </div>
+
+                <div class="rule-list">
+                  <div class="rule">
+                    <span class="rule-num">01</span>
+                    <div><strong>Declare inputs.</strong><p>Default is the package files. Add env files and global config that affect the build.</p></div>
+                  </div>
+                  <div class="rule">
+                    <span class="rule-num">02</span>
+                    <div><strong>Declare outputs.</strong><p>If it is not listed, it cannot be restored. Tests intentionally use an empty list.</p></div>
+                  </div>
+                  <div class="rule">
+                    <span class="rule-num">03</span>
+                    <div><strong>Wire dependencies.</strong><p><code>^build</code> makes an upstream change invalidate downstream tasks.</p></div>
+                  </div>
+                  <div class="rule">
+                    <span class="rule-num">04</span>
+                    <div><strong>Never cache side effects.</strong><p>Dev, deploy, and publish are not cacheable. Mark them <code>cache: false</code>.</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="command-strip">
+                <code>turbo run build --dry=json</code>
+                <span>inspect hashes</span>
+                <code>turbo run build --force</code>
+                <span>ignore cache</span>
+                <code>turbo run build --filter=@repo/ui</code>
+                <span>one package</span>
+              </div>
+            </div>
+            <aside class="notes">
+              Inputs and outputs are the contract with the cache. If you forget an input, you get stale
+              results. If you forget an output, Turborepo has nothing to restore. Use --dry=json to see
+              exactly what goes into the hash.
+            </aside>
+          </section>
+
+          <!-- 15 · CI -->
+          <section class="slide" data-part="Part 01" data-title="CI that stays fast">
+            <div class="eyebrow">CI</div>
+            <h2 class="slide-title">CI is where the cache <em>pays for itself</em></h2>
+            <p class="lead">The pipeline is simple. The speed comes from the graph.</p>
+
+            <div class="content">
+              <div class="split split--wide-left">
+                <div class="code-card">
+                  <div class="code-head">
+                    <span class="code-dots"><i></i><i></i><i></i></span>
+                    <span>.github/workflows/ci.yml</span>
+                  </div>
+                  <div class="code-body code-yaml">
+<span class="tok-k">name</span><span class="tok-p">:</span> <span class="tok-s">CI</span>
+<span class="tok-k">on</span><span class="tok-p">:</span> [<span class="tok-s">push</span>, <span class="tok-s">pull_request</span>]
+<span class="tok-k">jobs</span><span class="tok-p">:</span>
+  <span class="tok-k">ci</span><span class="tok-p">:</span>
+    <span class="tok-k">runs-on</span><span class="tok-p">:</span> <span class="tok-s">ubuntu-latest</span>
+    <span class="tok-k">steps</span><span class="tok-p">:</span>
+      - <span class="tok-k">uses</span><span class="tok-p">:</span> <span class="tok-s">actions/checkout@v4</span>
+      - <span class="tok-k">uses</span><span class="tok-p">:</span> <span class="tok-s">pnpm/action-setup@v4</span>
+      - <span class="tok-k">uses</span><span class="tok-p">:</span> <span class="tok-s">actions/setup-node@v4</span>
+        <span class="tok-k">with</span><span class="tok-p">:</span>
+          <span class="tok-k">node-version</span><span class="tok-p">:</span> <span class="tok-n">22</span>
+          <span class="tok-k">cache</span><span class="tok-p">:</span> <span class="tok-s">pnpm</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">pnpm install --frozen-lockfile</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">pnpm build</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">pnpm lint</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">pnpm typecheck</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">pnpm test</span>
+                  </div>
+                </div>
+
+                <div class="ci-notes">
+                  <div class="ci-item">
+                    <span class="tag tag--neutral">today</span>
+                    <div><strong>Every push runs the full pipeline.</strong><p>Reliable, but it does not know what changed.</p></div>
+                  </div>
+                  <div class="ci-item">
+                    <span class="tag tag--accent">next</span>
+                    <div><strong>Build only what changed.</strong><p><code>--filter=...[origin/main]</code> on pull requests.</p></div>
+                  </div>
+                  <div class="ci-item">
+                    <span class="tag tag--accent">next</span>
+                    <div><strong>Share the cache.</strong><p>Remote cache with <code>TURBO_TOKEN</code> and <code>TURBO_TEAM</code>.</p></div>
+                  </div>
+                  <div class="ci-item">
+                    <span class="tag tag--neutral">already</span>
+                    <div><strong>Cancel stale runs.</strong><p><code>concurrency</code> with <code>cancel-in-progress</code> is in the workflow.</p></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Fast CI is a design decision.</strong> It starts with honest inputs and outputs.</p>
+            </div>
+            <aside class="notes">
+              The current workflow is deliberately simple: install, build, lint, typecheck, test. The
+              next improvements are affected-only filtering and a remote cache. Be precise: the repo has
+              the concurrency setting today, but not the affected filter.
+            </aside>
+          </section>
+
+          <!-- 16 · WORKSPACE VS BACKEND -->
+          <section class="slide" data-part="Part 01" data-title="Workspace strategy vs backend strategy">
+            <div class="eyebrow">Strategy</div>
+            <h2 class="slide-title">Workspace strategy <em>vs.</em> backend strategy</h2>
+            <p class="lead">Same system, different delivery. Choose by where the consumer lives.</p>
+
+            <div class="content">
+              <div class="strategy-grid">
+                <article class="strategy-card">
+                  <div class="strategy-head">
+                    <span class="strategy-kicker">Strategy A</span>
+                    <h3>Workspace</h3>
+                    <span class="pill pill--accent">inside the repo</span>
+                  </div>
+                  <div class="strategy-visual">
+                    <span class="mini-node">app</span>
+                    <span class="mini-node">docs</span>
+                    <span class="mini-link">workspace:*</span>
+                    <span class="mini-node mini-node--accent">tokens</span>
+                    <span class="mini-node mini-node--accent">ui</span>
+                  </div>
+                  <ul class="spec-list">
+                    <li><span>Where</span><strong>Same git repo</strong></li>
+                    <li><span>Link</span><strong><code>workspace:*</code></strong></li>
+                    <li><span>Version</span><strong>One, atomic</strong></li>
+                    <li><span>Feedback</span><strong>Instant</strong></li>
+                    <li><span>Best for</span><strong>Apps, docs, internal tools</strong></li>
+                  </ul>
+                </article>
+
+                <article class="strategy-card strategy-card--backend">
+                  <div class="strategy-head">
+                    <span class="strategy-kicker">Strategy B</span>
+                    <h3>Backend</h3>
+                    <span class="pill">outside the repo</span>
+                  </div>
+                  <div class="strategy-visual">
+                    <span class="mini-node mini-node--accent">tokens</span>
+                    <span class="mini-link">publish → install</span>
+                    <span class="mini-node">API</span>
+                    <span class="mini-node">email</span>
+                    <span class="mini-node">mobile</span>
+                  </div>
+                  <ul class="spec-list">
+                    <li><span>Where</span><strong>Separate repo or service</strong></li>
+                    <li><span>Link</span><strong><code>@repo/tokens@1.4.0</code></strong></li>
+                    <li><span>Version</span><strong>Semver + release cadence</strong></li>
+                    <li><span>Feedback</span><strong>After publish</strong></li>
+                    <li><span>Best for</span><strong>APIs, email, mobile, partners</strong></li>
+                  </ul>
+                </article>
+              </div>
+
+              <div class="hybrid-bar">
+                <span class="hybrid-label">Recommended</span>
+                <p>
+                  <strong>Build in the workspace. Publish from the workspace. Let the backend consume the artifact.</strong>
+                  The source of truth stays in one place; only the delivery changes.
+                </p>
+              </div>
+            </div>
+            <aside class="notes">
+              This is the strategy conversation. If the consumer is inside the repo, workspace linking is
+              the fastest and safest option. If the consumer is a backend service, an email renderer, or
+              a mobile app in another repo, it needs a published artifact with a version. The hybrid is
+              the usual answer: source-linked inside, versioned outside.
+            </aside>
+          </section>
+
+          <!-- 17 · CACHE BACKEND -->
+          <section class="slide" data-part="Part 01" data-title="Cache backend: local or remote">
+            <div class="eyebrow">Strategy</div>
+            <h2 class="slide-title">Cache backend: <em>local or remote?</em></h2>
+            <p class="lead">Start local. Go remote when the team repeats the same work.</p>
+
+            <div class="content">
+              <div class="backend-grid">
+                <article class="backend-card">
+                  <span class="backend-num">01</span>
+                  <h3>Local</h3>
+                  <p class="backend-sub">On your machine</p>
+                  <div class="backend-path">.turbo/cache</div>
+                  <ul class="mini-spec">
+                    <li><span>Setup</span><strong>Zero</strong></li>
+                    <li><span>Shared with</span><strong>One machine</strong></li>
+                    <li><span>Best for</span><strong>Solo dev, first week</strong></li>
+                    <li><span>Watch out</span><strong>No CI reuse</strong></li>
+                  </ul>
+                </article>
+
+                <article class="backend-card backend-card--accent">
+                  <span class="backend-num">02</span>
+                  <h3>Remote</h3>
+                  <p class="backend-sub">Vercel Remote Cache</p>
+                  <div class="backend-path">TURBO_TOKEN · TURBO_TEAM</div>
+                  <ul class="mini-spec">
+                    <li><span>Setup</span><strong>Token + team</strong></li>
+                    <li><span>Shared with</span><strong>Team + CI</strong></li>
+                    <li><span>Best for</span><strong>Most product teams</strong></li>
+                    <li><span>Watch out</span><strong>Account / vendor</strong></li>
+                  </ul>
+                </article>
+
+                <article class="backend-card">
+                  <span class="backend-num">03</span>
+                  <h3>Self-hosted</h3>
+                  <p class="backend-sub">S3 or custom backend</p>
+                  <div class="backend-path">your storage · your rules</div>
+                  <ul class="mini-spec">
+                    <li><span>Setup</span><strong>Storage + API</strong></li>
+                    <li><span>Shared with</span><strong>Whole org</strong></li>
+                    <li><span>Best for</span><strong>Control, compliance</strong></li>
+                    <li><span>Watch out</span><strong>Ops burden</strong></li>
+                  </ul>
+                </article>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Do not self-host on day one.</strong> Make CI slow enough to justify it first.</p>
+            </div>
+            <aside class="notes">
+              "Backend strategy" also applies to the cache. Local is the default and costs nothing.
+              Remote is the sweet spot for a team: CI and laptops share the same artifacts. Self-hosting
+              is for compliance or scale, and it is real operational work.
+            </aside>
+          </section>
+
+          <!-- 18 · RULES -->
+          <section class="slide" data-part="Part 01" data-title="Rules that keep a monorepo healthy">
+            <div class="eyebrow">Habits</div>
+            <h2 class="slide-title">Rules that keep it <em>healthy</em></h2>
+            <p class="lead">Tools do not enforce architecture. Conventions do.</p>
+
+            <div class="content">
+              <div class="rules-grid">
+                <article class="rule-card">
+                  <span class="rule-card-num">01</span>
+                  <h3>Apps never import apps</h3>
+                  <p>Deployables are leaves. If two apps share code, it belongs in a package.</p>
+                </article>
+                <article class="rule-card">
+                  <span class="rule-card-num">02</span>
+                  <h3>Share through packages</h3>
+                  <p>No <code>../../ui/src</code>. Import <code>@repo/ui</code> and let the boundary do its job.</p>
+                </article>
+                <article class="rule-card">
+                  <span class="rule-card-num">03</span>
+                  <h3>One public entry</h3>
+                  <p><code>exports</code> in <code>package.json</code> is the API. Everything else is private.</p>
+                </article>
+                <article class="rule-card">
+                  <span class="rule-card-num">04</span>
+                  <h3>Pin the toolchain</h3>
+                  <p>One Node version, one pnpm version. <code>.nvmrc</code> and <code>packageManager</code>.</p>
+                </article>
+                <article class="rule-card">
+                  <span class="rule-card-num">05</span>
+                  <h3>Root scripts are the interface</h3>
+                  <p><code>pnpm build</code>, not <code>cd packages/ui && ...</code>. One entry point for everyone.</p>
+                </article>
+                <article class="rule-card">
+                  <span class="rule-card-num">06</span>
+                  <h3>Release with Changesets</h3>
+                  <p>Versions and changelogs are generated from reviewed changes, not edited by hand.</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Boundaries are a habit.</strong> Turborepo will not stop a bad import; code review must.</p>
+            </div>
+            <aside class="notes">
+              Turborepo does not enforce module boundaries the way Nx does. That is a deliberate trade:
+              we get simplicity, but we need conventions and review. These six rules cover most of the
+              day-to-day failure modes.
+            </aside>
+          </section>
+
+          <!-- 19 · SECTION 2 -->
+          <section class="slide slide--section" data-part="Part 02" data-title="Design System">
+            <div class="section-watermark" aria-hidden="true">02</div>
+            <div class="section-inner">
+              <div class="eyebrow eyebrow--light">Part 02 · Design system</div>
+              <h2 class="section-title">Tokens are<br /><em>the contract.</em></h2>
+              <p class="section-lead">
+                Three tiers, one naming language, and a pipeline from Figma to a component near you.
+              </p>
+              <div class="section-topics">
+                <span>primitive</span>
+                <span>semantic</span>
+                <span>component</span>
+                <span>pipeline</span>
+              </div>
+            </div>
+            <aside class="notes">
+              Part 2. The monorepo gives us one place to change things. Tokens give us one language for
+              those changes. We will move from the smallest decision to the full pipeline.
+            </aside>
+          </section>
+
+          <!-- 20 · WHAT IS A DS -->
+          <section class="slide" data-part="Part 02" data-title="What a design system is">
+            <div class="eyebrow">Foundation</div>
+            <h2 class="slide-title">A design system is <em>three layers</em></h2>
+            <p class="lead">If it only lives in Figma, it is a style guide. If it only lives in code, it is a component library.</p>
+
+            <div class="content">
+              <div class="layer-flow">
+                <article class="layer-card">
+                  <span class="layer-num">01</span>
+                  <h3>Tokens</h3>
+                  <p class="layer-sub">The decisions</p>
+                  <p>Color, type, space, radius, shadow, motion.</p>
+                  <code class="inline-code">accent.solid</code>
+                </article>
+                <div class="flow-arrow" aria-hidden="true">→</div>
+                <article class="layer-card">
+                  <span class="layer-num">02</span>
+                  <h3>Components</h3>
+                  <p class="layer-sub">The behavior</p>
+                  <p>Accessible, reusable building blocks with states and variants.</p>
+                  <code class="inline-code">&lt;Button /&gt;</code>
+                </article>
+                <div class="flow-arrow" aria-hidden="true">→</div>
+                <article class="layer-card">
+                  <span class="layer-num">03</span>
+                  <h3>Docs</h3>
+                  <p class="layer-sub">The adoption</p>
+                  <p>Examples, guidelines, and tests that keep the system usable.</p>
+                  <code class="inline-code">Button / Primary</code>
+                </article>
+              </div>
+
+              <div class="quote-band">
+                <p>“A design system is the <strong>agreement</strong> between design and engineering — made executable.”</p>
+              </div>
+            </div>
+            <aside class="notes">
+              A design system is not just a React library. Tokens carry decisions, components carry
+              behavior and accessibility, docs carry adoption. The three layers must stay connected or
+              the system drifts.
+            </aside>
+          </section>
+
+          <!-- 21 · THREE TIERS -->
+          <section class="slide" data-part="Part 02" data-title="Three tiers, one direction">
+            <div class="eyebrow">Token architecture</div>
+            <h2 class="slide-title">Three tiers. <em>One direction.</em></h2>
+            <p class="lead">Each tier answers a different question.</p>
+
+            <div class="content">
+              <div class="tier-layout">
+                <div class="tier-stack">
+                  <div class="tier tier--component">
+                    <div><span class="tier-label">Component</span><strong>button.primary.background</strong></div>
+                    <small>one component's contract</small>
+                  </div>
+                  <div class="tier tier--semantic">
+                    <div><span class="tier-label">Semantic</span><strong>accent.solid</strong></div>
+                    <small>role in the interface</small>
+                  </div>
+                  <div class="tier tier--primitive">
+                    <div><span class="tier-label">Primitive</span><strong>indigo.700</strong></div>
+                    <small>raw value</small>
+                  </div>
+                  <div class="tier-arrow" aria-hidden="true">
+                    <span>references</span>
+                    <span>↓</span>
+                  </div>
+                </div>
+
+                <div class="tier-rules">
+                  <div class="tier-rule">
+                    <h3>Primitive</h3>
+                    <p>Raw values only. A stable scale with no product meaning. <code>indigo.700 = #4338ca</code></p>
+                  </div>
+                  <div class="tier-rule">
+                    <h3>Semantic</h3>
+                    <p>Meaning and role. This is where light and dark diverge. <code>accent.solid → primary.700</code></p>
+                  </div>
+                  <div class="tier-rule">
+                    <h3>Component</h3>
+                    <p>One component's decision. Optional precision, never a second palette.</p>
+                  </div>
+                  <div class="tier-rule tier-rule--warn">
+                    <h3>The rule</h3>
+                    <p>Reference only downward. Components never jump straight to primitives.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stat-chips">
+                <span><strong>302</strong> color primitives</span>
+                <span><strong>49</strong> semantic colors</span>
+                <span><strong>9</strong> component token sets</span>
+              </div>
+            </div>
+            <aside class="notes">
+              The three tiers are a dependency chain, not a hierarchy of importance. Primitives answer
+              "what value?" Semantics answer "where and why?" Components answer "which part of this
+              component?" The most common mistake is skipping the middle tier.
+            </aside>
+          </section>
+
+          <!-- 22 · NAMING -->
+          <section class="slide" data-part="Part 02" data-title="Naming tokens">
+            <div class="eyebrow">Naming</div>
+            <h2 class="slide-title">A token name is an <em>API</em></h2>
+            <p class="lead">Name the role, not the value. Keep one order everywhere.</p>
+
+            <div class="content">
+              <div class="anatomy-card">
+                <div class="anatomy">
+                  <div class="anatomy-part"><span class="slot">tier</span><code>component</code></div>
+                  <span class="anatomy-dot">.</span>
+                  <div class="anatomy-part"><span class="slot">domain</span><code>button</code></div>
+                  <span class="anatomy-dot">.</span>
+                  <div class="anatomy-part"><span class="slot">variant</span><code>primary</code></div>
+                  <span class="anatomy-dot">.</span>
+                  <div class="anatomy-part"><span class="slot">property · state</span><code>background-hover</code></div>
+                </div>
+                <p class="anatomy-caption">Also works for semantic: <code>semantic.color.accent.solid</code></p>
+              </div>
+
+              <div class="naming-grid">
+                <div class="naming-rules">
+                  <div class="naming-rule"><span>01</span><p><strong>Name the meaning.</strong> <code>danger</code>, not <code>red</code>.</p></div>
+                  <div class="naming-rule"><span>02</span><p><strong>Keep mode out.</strong> <code>surface</code>, not <code>darkSurface</code>.</p></div>
+                  <div class="naming-rule"><span>03</span><p><strong>One order.</strong> category → role → variant → state.</p></div>
+                  <div class="naming-rule"><span>04</span><p><strong>Be specific.</strong> Component tokens include the component name.</p></div>
+                </div>
+
+                <div class="goodbad">
+                  <div class="goodbad-head"><span>Instead of</span><span>Use</span></div>
+                  <div class="gb-row"><code class="bad">color.red</code><code class="good">color.danger</code></div>
+                  <div class="gb-row"><code class="bad">color.white</code><code class="good">surface.raised</code></div>
+                  <div class="gb-row"><code class="bad">buttonBlue</code><code class="good">button.primary.background</code></div>
+                  <div class="gb-row"><code class="bad">darkText</code><code class="good">content.primary</code></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>If the name changes when the theme changes,</strong> it is not a semantic token.</p>
+            </div>
+            <aside class="notes">
+              Naming is where most design systems fail quietly. If a token is named after a color, it
+              cannot survive a rebrand. If it is named after a mode, it cannot switch modes. The order
+              also matters: keep tier, domain, role, variant, state consistent so the name is predictable.
+            </aside>
+          </section>
+
+          <!-- 23 · PRIMITIVES -->
+          <section class="slide" data-part="Part 02" data-title="Primitive tokens">
+            <div class="eyebrow">Tier 1</div>
+            <h2 class="slide-title">Primitive tokens: <em>the raw material</em></h2>
+            <p class="lead">A palette, not an API. Components should never see these names.</p>
+
+            <div class="content">
+              <div class="split split--wide-left">
+                <div class="primitive-visual">
+                  <div class="palette-card">
+                    <div class="palette-head">
+                      <span>color · indigo</span>
+                      <code>indigo.700</code>
+                    </div>
+                    <div class="palette-row">
+                      <div class="swatch" style="background:#eef2ff"><span>50</span></div>
+                      <div class="swatch" style="background:#e0e7ff"><span>100</span></div>
+                      <div class="swatch" style="background:#c7d2fe"><span>200</span></div>
+                      <div class="swatch" style="background:#a5b4fc"><span>300</span></div>
+                      <div class="swatch" style="background:#818cf8"><span>400</span></div>
+                      <div class="swatch" style="background:#6366f1"><span>500</span></div>
+                      <div class="swatch" style="background:#4f46e5"><span>600</span></div>
+                      <div class="swatch swatch--active" style="background:#4338ca"><span>700</span></div>
+                      <div class="swatch" style="background:#3730a3"><span>800</span></div>
+                      <div class="swatch" style="background:#312e81"><span>900</span></div>
+                    </div>
+                  </div>
+
+                  <div class="primitive-rows">
+                    <div class="primitive-row">
+                      <span class="primitive-label">space</span>
+                      <div class="space-scale">
+                        <span style="width:8px"></span><span style="width:12px"></span><span style="width:16px"></span><span style="width:24px"></span><span style="width:32px"></span>
+                      </div>
+                      <code>4 · 8 · 16 · 24 · 32</code>
+                    </div>
+                    <div class="primitive-row">
+                      <span class="primitive-label">radius</span>
+                      <div class="radius-scale">
+                        <span style="border-radius:3px"></span><span style="border-radius:6px"></span><span style="border-radius:9px"></span><span style="border-radius:14px"></span><span style="border-radius:999px"></span>
+                      </div>
+                      <code>sm · md · lg · xl · full</code>
+                    </div>
+                  </div>
+
+                  <ul class="plain-rules">
+                    <li>Raw values only — color, size, radius, shadow.</li>
+                    <li>Fixed scales: <code>50–900</code>, <code>1–12</code>.</li>
+                    <li>No product meaning and no theme logic.</li>
+                    <li>Never imported by a component.</li>
+                  </ul>
+                </div>
+
+                <div class="primitive-right">
+                  <div class="code-card">
+                    <div class="code-head">
+                      <span class="code-dots"><i></i><i></i><i></i></span>
+                      <span>primitives/color-light.json</span>
+                    </div>
+                    <div class="code-body">
+<span class="tok-p">{</span>
+  <span class="tok-k">"indigo"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+    <span class="tok-k">"700"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+      <span class="tok-k">"value"</span><span class="tok-p">:</span> <span class="tok-s">"#4338ca"</span><span class="tok-p">,</span>
+      <span class="tok-k">"type"</span><span class="tok-p">:</span> <span class="tok-s">"color"</span>
+    <span class="tok-p">}</span>
+  <span class="tok-p">}</span>
+<span class="tok-p">}</span>
+                    </div>
+                  </div>
+
+                  <p class="primitive-note">
+                    One JSON set per file. The build normalizes it into a stable path:
+                    <code>color.indigo.700</code>.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Primitives are replaceable.</strong> Semantic names are what survive a rebrand.</p>
+            </div>
+            <aside class="notes">
+              Primitives are intentionally boring. The indigo scale does not know what a button is. That
+              ignorance is the point: we can swap the entire palette and the semantic layer keeps its
+              names.
+            </aside>
+          </section>
+
+          <!-- 24 · SEMANTIC -->
+          <section class="slide" data-part="Part 02" data-title="Semantic tokens">
+            <div class="eyebrow">Tier 2</div>
+            <h2 class="slide-title">Semantic tokens: <em>say what it means</em></h2>
+            <p class="lead">Same name. Different value per theme.</p>
+
+            <div class="content">
+              <div class="semantic-layout">
+                <div class="semantic-left">
+                  <div class="semantic-grid">
+                    <div class="semantic-card"><span class="semantic-cat">surface</span><code>canvas · raised · overlay</code></div>
+                    <div class="semantic-card"><span class="semantic-cat">content</span><code>primary · secondary · disabled</code></div>
+                    <div class="semantic-card"><span class="semantic-cat">stroke</span><code>default · strong · focus</code></div>
+                    <div class="semantic-card"><span class="semantic-cat">accent</span><code>solid · hover · contrast</code></div>
+                    <div class="semantic-card"><span class="semantic-cat">status</span><code>danger · success · warning</code></div>
+                    <div class="semantic-card"><span class="semantic-cat">focus</span><code>ring</code></div>
+                  </div>
+
+                  <div class="code-card code-card--compact">
+                    <div class="code-head">
+                      <span class="code-dots"><i></i><i></i><i></i></span>
+                      <span>normalized contract</span>
+                    </div>
+                    <div class="code-body">
+<span class="tok-k">"surface"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+  <span class="tok-k">"canvas"</span><span class="tok-p">:</span> <span class="tok-p">{</span> <span class="tok-k">"value"</span><span class="tok-p">:</span> <span class="tok-s">"{neutral.100}"</span> <span class="tok-p">}</span>
+<span class="tok-p">},</span>
+<span class="tok-k">"accent"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+  <span class="tok-k">"solid"</span><span class="tok-p">:</span> <span class="tok-p">{</span> <span class="tok-k">"value"</span><span class="tok-p">:</span> <span class="tok-s">"{primary.700}"</span> <span class="tok-p">}</span>
+<span class="tok-p">}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="theme-card">
+                  <div class="theme-head">
+                    <span>Resolved values</span>
+                    <div class="theme-toggle" aria-hidden="true"><span class="active">Light</span><span>Dark</span></div>
+                  </div>
+                  <div class="theme-table">
+                    <div class="theme-row theme-row--head">
+                      <span>Token</span><span>Light</span><span>Dark</span>
+                    </div>
+                    <div class="theme-row">
+                      <code>accent.solid</code>
+                      <span class="color-cell"><i style="background:#4338ca"></i>#4338ca</span>
+                      <span class="color-cell"><i style="background:#a5b4fc"></i>#a5b4fc</span>
+                    </div>
+                    <div class="theme-row">
+                      <code>surface.canvas</code>
+                      <span class="color-cell"><i style="background:#f3f4f6"></i>#f3f4f6</span>
+                      <span class="color-cell"><i style="background:#111827"></i>#111827</span>
+                    </div>
+                    <div class="theme-row">
+                      <code>content.primary</code>
+                      <span class="color-cell"><i style="background:#030712"></i>#030712</span>
+                      <span class="color-cell"><i style="background:#ffffff"></i>#ffffff</span>
+                    </div>
+                    <div class="theme-row">
+                      <code>danger.solid</code>
+                      <span class="color-cell"><i style="background:#b91c1c"></i>#b91c1c</span>
+                      <span class="color-cell"><i style="background:#fca5a5"></i>#fca5a5</span>
+                    </div>
+                  </div>
+                  <p class="theme-note">The name is stable. The value is theme-specific.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Semantic tokens are where theming lives.</strong> Everything above them stays theme-agnostic.</p>
+            </div>
+            <aside class="notes">
+              Semantic tokens are the layer that makes dark mode possible without renaming anything.
+              Designers and engineers both use the same word: surface, content, accent, stroke. Under
+              the hood, light and dark point to different primitives.
+            </aside>
+          </section>
+
+          <!-- 25 · COMPONENT -->
+          <section class="slide" data-part="Part 02" data-title="Component tokens">
+            <div class="eyebrow">Tier 3</div>
+            <h2 class="slide-title">Component tokens: <em>the contract</em></h2>
+            <p class="lead">Only tokenize what varies. Layout stays in the component.</p>
+
+            <div class="content">
+              <div class="split split--wide-left">
+                <div class="code-card">
+                  <div class="code-head">
+                    <span class="code-dots"><i></i><i></i><i></i></span>
+                    <span>component/button.json</span>
+                  </div>
+                  <div class="code-body">
+<span class="tok-p">{</span>
+  <span class="tok-k">"component"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+    <span class="tok-k">"button"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+      <span class="tok-k">"radius"</span><span class="tok-p">:</span> <span class="tok-p">{</span> <span class="tok-k">"value"</span><span class="tok-p">:</span> <span class="tok-s">"{radius.md}"</span> <span class="tok-p">},</span>
+      <span class="tok-k">"primary"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+        <span class="tok-k">"background"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+          <span class="tok-k">"value"</span><span class="tok-p">:</span> <span class="tok-s">"{semantic.color.accent.solid}"</span>
+        <span class="tok-p">},</span>
+        <span class="tok-k">"foreground"</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+          <span class="tok-k">"value"</span><span class="tok-p">:</span> <span class="tok-s">"{semantic.color.accent.contrast}"</span>
+        <span class="tok-p">}</span>
+      <span class="tok-p">}</span>
+    <span class="tok-p">}</span>
+  <span class="tok-p">}</span>
+<span class="tok-p">}</span>
+                  </div>
+                </div>
+
+                <div class="component-rules">
+                  <div class="component-rule">
+                    <span class="rule-num">01</span>
+                    <div><strong>One file per component.</strong><p>Ownership stays obvious.</p></div>
+                  </div>
+                  <div class="component-rule">
+                    <span class="rule-num">02</span>
+                    <div><strong>Predictable path.</strong><p><code>component.name.variant.property</code></p></div>
+                  </div>
+                  <div class="component-rule">
+                    <span class="rule-num">03</span>
+                    <div><strong>Point to semantic.</strong><p>Never to a primitive. Theme switching depends on it.</p></div>
+                  </div>
+                  <div class="component-rule">
+                    <span class="rule-num">04</span>
+                    <div><strong>Tokenize the variation.</strong><p>Colors, borders, radius. Not every padding.</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="map-strip">
+                <code>component.button.primary.background</code>
+                <span>→</span>
+                <code>--ds-component-button-primary-background</code>
+                <span>→</span>
+                <code>bg-button-primary-background</code>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Component tokens are the API</strong> between design intent and component implementation.</p>
+            </div>
+            <aside class="notes">
+              Component tokens are optional. They are useful when a component needs a decision that is
+              more specific than the semantic layer, or when multiple brands need to diverge. The test:
+              if the token cannot be explained without naming the component, it belongs here.
+            </aside>
+          </section>
+
+          <!-- 26 · NAME CHAIN -->
+          <section class="slide" data-part="Part 02" data-title="One name, four representations">
+            <div class="eyebrow">The contract</div>
+            <h2 class="slide-title">One name. <em>Four representations.</em></h2>
+            <p class="lead">The name survives the whole pipeline. Nothing is renamed by hand.</p>
+
+            <div class="content">
+              <div class="chain">
+                <div class="chain-label">Semantic</div>
+                <div class="chain-track">
+                  <div class="chain-step"><span class="chain-kicker">Figma</span><code>semantic/color/accent/solid</code></div>
+                  <span class="chain-arrow">→</span>
+                  <div class="chain-step"><span class="chain-kicker">JSON</span><code>semantic.color.accent.solid</code></div>
+                  <span class="chain-arrow">→</span>
+                  <div class="chain-step"><span class="chain-kicker">CSS</span><code>--ds-semantic-color-accent-solid</code></div>
+                  <span class="chain-arrow">→</span>
+                  <div class="chain-step chain-step--accent"><span class="chain-kicker">Tailwind</span><code>bg-accent</code></div>
+                </div>
+              </div>
+
+              <div class="chain">
+                <div class="chain-label">Component</div>
+                <div class="chain-track">
+                  <div class="chain-step"><span class="chain-kicker">Figma</span><code>component/button/primary/background</code></div>
+                  <span class="chain-arrow">→</span>
+                  <div class="chain-step"><span class="chain-kicker">JSON</span><code>component.button.primary.background</code></div>
+                  <span class="chain-arrow">→</span>
+                  <div class="chain-step"><span class="chain-kicker">CSS</span><code>--ds-component-button-primary-background</code></div>
+                  <span class="chain-arrow">→</span>
+                  <div class="chain-step chain-step--accent"><span class="chain-kicker">Tailwind</span><code>bg-button-primary-background</code></div>
+                </div>
+              </div>
+
+              <div class="chain-note">
+                <span class="chain-note-mark">↳</span>
+                <p>Search the same name in Figma, in the token JSON, in CSS, and in a component. It resolves to the same decision.</p>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>This is the contract.</strong> The tooling translates the format, not the meaning.</p>
+            </div>
+            <aside class="notes">
+              This is the slide to remember from the design-system half. A designer says "accent solid".
+              The JSON says semantic.color.accent.solid. The CSS variable says
+              --ds-semantic-color-accent-solid. Tailwind says bg-accent. Same name, four formats.
+            </aside>
+          </section>
+
+          <!-- 27 · FIGMA FLOW -->
+          <section class="slide" data-part="Part 02" data-title="Figma → GitHub → code">
+            <div class="eyebrow">Source of truth</div>
+            <h2 class="slide-title">Figma → GitHub → <em>code</em></h2>
+            <p class="lead">Designers edit. Tokens Studio writes JSON. The build writes code.</p>
+
+            <div class="content">
+              <div class="sync-flow">
+                <div class="sync-panel sync-panel--figma">
+                  <div class="sync-head"><span class="sync-dot sync-dot--figma"></span>Figma · Tokens Studio</div>
+                  <div class="sync-rows">
+                    <div class="sync-row"><span>primitives/color-light</span><small>302</small></div>
+                    <div class="sync-row"><span>semantic/color-light</span><small>99</small></div>
+                    <div class="sync-row"><span>component/button</span><small>23</small></div>
+                  </div>
+                  <div class="sync-foot">edit sets · review values</div>
+                </div>
+
+                <div class="sync-arrow">
+                  <span class="sync-arrow-label">Push</span>
+                  <span class="sync-arrow-icon">→</span>
+                  <span class="sync-arrow-sub">folder sync</span>
+                </div>
+
+                <div class="sync-panel sync-panel--repo">
+                  <div class="sync-head"><span class="sync-dot sync-dot--repo"></span>GitHub · token source</div>
+                  <div class="sync-tree">
+<span class="tree-dim">tokens/</span>
+├── <span class="tree-folder">primitives/</span>
+├── <span class="tree-folder">semantic/</span>
+├── <span class="tree-folder">component/</span>
+├── <span class="tree-file">$metadata.json</span>
+└── <span class="tree-file">$themes.json</span>
+                  </div>
+                  <div class="sync-foot">one JSON file per set</div>
+                </div>
+
+                <div class="sync-arrow">
+                  <span class="sync-arrow-label">Build</span>
+                  <span class="sync-arrow-icon">→</span>
+                  <span class="sync-arrow-sub">pnpm tokens</span>
+                </div>
+
+                <div class="sync-panel sync-panel--build">
+                  <div class="sync-head"><span class="sync-dot sync-dot--build"></span>dist · consumables</div>
+                  <div class="sync-tree">
+<span class="tree-dim">dist/</span>
+├── <span class="tree-file">variables.css</span>
+├── <span class="tree-file">tailwind.css</span>
+├── <span class="tree-file">tokens.json</span>
+└── <span class="tree-file">tokens.d.ts</span>
+                  </div>
+                  <div class="sync-foot">generated · never edited</div>
+                </div>
+              </div>
+
+              <div class="sync-notes">
+                <div class="sync-note"><span>↺</span><p><strong>Pull is bootstrap only.</strong> It loads existing files into Figma; the normal flow is Push.</p></div>
+                <div class="sync-note"><span>⌘</span><p><strong>Folder sync is a Pro feature.</strong> On the free plan, import the set files manually.</p></div>
+                <div class="sync-note"><span>✓</span><p><strong>Review token changes like code.</strong> They are JSON files in a pull request.</p></div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Design is the source.</strong> GitHub is the record. The build is the delivery.</p>
+            </div>
+            <aside class="notes">
+              Figma is the source of truth because that is where design decisions are made. Tokens Studio
+              is the bridge that writes one JSON file per set. GitHub is the reviewable record. Pull is
+              only used to load the existing files into Figma; day to day, designers push.
+            </aside>
+          </section>
+
+          <!-- 28 · TOKEN CI -->
+          <section class="slide" data-part="Part 02" data-title="Token CI">
+            <div class="eyebrow">CI</div>
+            <h2 class="slide-title">Token CI: fail the PR, <em>not the app</em></h2>
+            <p class="lead">Tokens are code. Treat them like code.</p>
+
+            <div class="content">
+              <div class="split split--wide-left">
+                <div class="code-card">
+                  <div class="code-head">
+                    <span class="code-dots"><i></i><i></i><i></i></span>
+                    <span>.github/workflows/tokens.yml</span>
+                  </div>
+                  <div class="code-body code-yaml">
+<span class="tok-k">name</span><span class="tok-p">:</span> <span class="tok-s">Tokens</span>
+<span class="tok-k">on</span><span class="tok-p">:</span>
+  <span class="tok-k">push</span><span class="tok-p">:</span>
+    <span class="tok-k">paths</span><span class="tok-p">:</span>
+      - <span class="tok-s">"packages/tokens/tokens/**"</span>
+      - <span class="tok-s">"packages/tokens/build.mjs"</span>
+<span class="tok-k">jobs</span><span class="tok-p">:</span>
+  <span class="tok-k">build</span><span class="tok-p">:</span>
+    <span class="tok-k">steps</span><span class="tok-p">:</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">pnpm install --frozen-lockfile</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">pnpm --filter @repo/tokens build</span>
+      - <span class="tok-k">run</span><span class="tok-p">:</span> <span class="tok-s">test -f dist/variables.css</span>
+      - <span class="tok-k">uses</span><span class="tok-p">:</span> <span class="tok-s">actions/upload-artifact@v4</span>
+        <span class="tok-k">with</span><span class="tok-p">:</span>
+          <span class="tok-k">name</span><span class="tok-p">:</span> <span class="tok-s">tokens-dist</span>
+          <span class="tok-k">path</span><span class="tok-p">:</span> <span class="tok-s">packages/tokens/dist</span>
+                  </div>
+                </div>
+
+                <div class="gates">
+                  <div class="gate">
+                    <span class="gate-num">01</span>
+                    <div><strong>Valid JSON</strong><p>Every token has a value and a type. Schema checks catch typos before the build.</p></div>
+                  </div>
+                  <div class="gate">
+                    <span class="gate-num">02</span>
+                    <div><strong>Naming lint</strong><p>Enforce the tier pattern and ban raw hex in component tokens.</p></div>
+                  </div>
+                  <div class="gate">
+                    <span class="gate-num">03</span>
+                    <div><strong>Deterministic build</strong><p>Build twice, then <code>git diff --exit-code</code>. Generated output must be stable.</p></div>
+                  </div>
+                  <div class="gate">
+                    <span class="gate-num">04</span>
+                    <div><strong>Artifact + preview</strong><p>Upload <code>dist</code> and preview the change in Storybook before merge.</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="trigger-strip">
+                <span class="trigger-label">Triggers</span>
+                <code>tokens/**</code>
+                <code>build.mjs</code>
+                <code>workflow_dispatch</code>
+                <code>repository_dispatch: tokens-updated</code>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>A token error should block a pull request,</strong> not surface as a broken button in production.</p>
+            </div>
+            <aside class="notes">
+              The token workflow already exists. It triggers on token changes, builds the package,
+              verifies the outputs, and uploads the artifact. The next level is schema validation,
+              naming lint, and a deterministic build check. Those are cheap and catch most mistakes.
+            </aside>
+          </section>
+
+          <!-- 29 · BUILD -->
+          <section class="slide" data-part="Part 02" data-title="The token build">
+            <div class="eyebrow">Build</div>
+            <h2 class="slide-title">The token build, <em>in one pass</em></h2>
+            <p class="lead">From set files to six consumable artifacts.</p>
+
+            <div class="content">
+              <div class="pipeline">
+                <article class="pipe-card">
+                  <span class="pipe-num">01</span>
+                  <h3>Read sets</h3>
+                  <p><code>primitives/</code>, <code>semantic/</code>, <code>component/</code></p>
+                </article>
+                <span class="pipe-arrow">→</span>
+                <article class="pipe-card">
+                  <span class="pipe-num">02</span>
+                  <h3>Pick mode</h3>
+                  <p>Light and dark are explicit set files, not hidden overrides.</p>
+                </article>
+                <span class="pipe-arrow">→</span>
+                <article class="pipe-card">
+                  <span class="pipe-num">03</span>
+                  <h3>Normalize</h3>
+                  <p>Resolve aliases, map names, flatten the contract.</p>
+                </article>
+                <span class="pipe-arrow">→</span>
+                <article class="pipe-card">
+                  <span class="pipe-num">04</span>
+                  <h3>Transform</h3>
+                  <p>Style Dictionary + Tokens Studio transforms.</p>
+                </article>
+                <span class="pipe-arrow">→</span>
+                <article class="pipe-card">
+                  <span class="pipe-num">05</span>
+                  <h3>Emit</h3>
+                  <p>CSS variables, Tailwind theme, JS, types.</p>
+                </article>
+              </div>
+
+              <div class="output-panel">
+                <div class="output-head">
+                  <span>packages/tokens/dist</span>
+                  <span class="pill">pnpm tokens</span>
+                </div>
+                <div class="output-files">
+                  <code>variables.css</code>
+                  <code>tailwind.css</code>
+                  <code>tokens.json</code>
+                  <code>tokens.mjs</code>
+                  <code>tokens.cjs</code>
+                  <code>tokens.d.ts</code>
+                </div>
+                <div class="output-stats">
+                  <span><strong>49</strong> semantic colors</span>
+                  <span><strong>18</strong> radii</span>
+                  <span><strong>37</strong> typography tokens</span>
+                  <span><strong>8</strong> shadows</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Generated files are build artifacts.</strong> Change the source, never the output.</p>
+            </div>
+            <aside class="notes">
+              The build reads the set files, merges the right mode, normalizes names into the contract,
+              runs Style Dictionary, and emits CSS, Tailwind, JSON, JS, and types. It is boring on
+              purpose: deterministic input, deterministic output.
+            </aside>
+          </section>
+
+          <!-- 30 · COMPONENTS -->
+          <section class="slide slide--code-dense" data-part="Part 02" data-title="Using tokens in components">
+            <div class="eyebrow">Consumption</div>
+            <h2 class="slide-title">Consume tokens, <em>don't copy values</em></h2>
+            <p class="lead">Components speak in classes generated from tokens.</p>
+
+            <div class="content">
+              <div class="split split--wide-left">
+                <div class="code-stack">
+                  <div class="code-card">
+                    <div class="code-head">
+                      <span class="code-dots"><i></i><i></i><i></i></span>
+                      <span>packages/ui/src/styles.css</span>
+                    </div>
+                    <div class="code-body">
+<span class="tok-k">@import</span> <span class="tok-s">"tailwindcss/theme.css"</span> layer(theme);
+<span class="tok-k">@import</span> <span class="tok-s">"@repo/tokens/tailwind.css"</span>;
+<span class="tok-k">@import</span> <span class="tok-s">"tailwindcss/utilities.css"</span> layer(utilities);
+                    </div>
+                  </div>
+
+                  <div class="code-card">
+                    <div class="code-head">
+                      <span class="code-dots"><i></i><i></i><i></i></span>
+                      <span>button.tsx · cva</span>
+                    </div>
+                    <div class="code-body">
+<span class="tok-k">const</span> button = <span class="tok-f">cva</span>(
+  <span class="tok-s">"rounded-button text-sm font-medium"</span>,
+  {
+    <span class="tok-k">variants</span>: {
+      <span class="tok-k">variant</span>: {
+        <span class="tok-k">primary</span>:
+          <span class="tok-s">"bg-button-primary-background text-button-primary-foreground"</span>,
+        <span class="tok-k">ghost</span>:
+          <span class="tok-s">"bg-button-ghost-background text-button-ghost-foreground"</span>,
+      },
+    },
+  },
+);
+                    </div>
+                  </div>
+                </div>
+
+                <div class="consume-rules">
+                  <div class="consume-rule"><span>01</span><p><strong>Static class strings.</strong> Tailwind cannot see <code>bg-${variant}</code>.</p></div>
+                  <div class="consume-rule"><span>02</span><p><strong>No raw hex.</strong> If a color is missing, add a token — not a value.</p></div>
+                  <div class="consume-rule"><span>03</span><p><strong>Component token first.</strong> Fall back to semantic only when the component tier has no decision.</p></div>
+                  <div class="consume-rule"><span>04</span><p><strong>Theme is ambient.</strong> <code>[data-theme="dark"]</code> flips the variables; components do not take a mode prop.</p></div>
+                  <div class="consume-rule"><span>05</span><p><strong>RTL is structural.</strong> Use logical properties: <code>ps-*</code>, <code>me-*</code>, <code>text-start</code>.</p></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>This deck uses the same pattern.</strong> Press <kbd>T</kbd> — one switch, every color changes.</p>
+            </div>
+            <aside class="notes">
+              Components should never contain raw values. They use the classes generated from tokens.
+              The theme is ambient: no prop drilling, just a data attribute on the root. Tailwind needs
+              static class names, so variant maps must be explicit. This is also why cva is a good fit.
+            </aside>
+          </section>
+
+          <!-- 31 · ONE PR -->
+          <section class="slide" data-part="Part 02" data-title="One PR changes design and code">
+            <div class="eyebrow">The payoff</div>
+            <h2 class="slide-title">One PR changes <em>design and code</em></h2>
+            <p class="lead">This is the monorepo payoff: one review, one version, one rollback.</p>
+
+            <div class="content">
+              <div class="pr-layout">
+                <div class="pr-card">
+                  <div class="pr-head">
+                    <span class="pr-repo">my-design-system</span>
+                    <span class="pr-number">#128</span>
+                    <span class="pr-state">Open</span>
+                  </div>
+                  <h3 class="pr-title">feat(tokens): refine button focus ring</h3>
+                  <div class="pr-branch"><code>main</code><span>←</span><code>feat/button-focus</code></div>
+                  <div class="pr-files">
+                    <div class="pr-file"><code>tokens/component/button.json</code><span class="add">+4</span><span class="del">−2</span></div>
+                    <div class="pr-file"><code>ui/.../button.tsx</code><span class="add">+3</span><span class="del">−1</span></div>
+                    <div class="pr-file"><code>docs/.../button.stories.tsx</code><span class="add">+8</span></div>
+                    <div class="pr-file"><code>ui/.../button.test.tsx</code><span class="add">+6</span></div>
+                  </div>
+                  <div class="pr-checks">
+                    <span class="check">✓ tokens</span>
+                    <span class="check">✓ lint</span>
+                    <span class="check">✓ typecheck</span>
+                    <span class="check">✓ test</span>
+                    <span class="check">✓ storybook</span>
+                  </div>
+                </div>
+
+                <div class="pr-why">
+                  <div class="why-item"><span>01</span><p><strong>One review.</strong> Design intent and implementation are visible together.</p></div>
+                  <div class="why-item"><span>02</span><p><strong>One version.</strong> No package skew between tokens, UI, and docs.</p></div>
+                  <div class="why-item"><span>03</span><p><strong>One rollback.</strong> Revert the PR, not five repositories.</p></div>
+                </div>
+              </div>
+
+              <div class="pr-flow">
+                <span>Figma push</span><i>→</i><span>PR</span><i>→</i><span>CI</span><i>→</i><span>merge</span><i>→</i><span>changeset</span><i>→</i><span>publish</span>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Atomic change is the real monorepo win.</strong> The rest is speed.</p>
+            </div>
+            <aside class="notes">
+              This is the slide that ties both halves together. A token change, a component change, a
+              story, and a test all land in one PR. CI verifies the whole chain. Changesets handles the
+              version. That is the workflow the monorepo enables.
+            </aside>
+          </section>
+
+          <!-- 32 · MISTAKES -->
+          <section class="slide" data-part="Part 02" data-title="Common mistakes">
+            <div class="eyebrow">Field notes</div>
+            <h2 class="slide-title">Six ways to <em>break the system</em></h2>
+            <p class="lead">And the fix for each.</p>
+
+            <div class="content">
+              <div class="mistake-grid">
+                <article class="mistake">
+                  <span class="mistake-label">Raw values</span>
+                  <code class="bad">#4338ca</code>
+                  <span class="mistake-arrow">→</span>
+                  <code class="good">bg-accent</code>
+                  <p>The token is the decision.</p>
+                </article>
+                <article class="mistake">
+                  <span class="mistake-label">Dynamic classes</span>
+                  <code class="bad">bg-${variant}</code>
+                  <span class="mistake-arrow">→</span>
+                  <code class="good">cva({ variants })</code>
+                  <p>Tailwind only sees static strings.</p>
+                </article>
+                <article class="mistake">
+                  <span class="mistake-label">Mode in the name</span>
+                  <code class="bad">darkText</code>
+                  <span class="mistake-arrow">→</span>
+                  <code class="good">content.primary</code>
+                  <p>Theme changes the value, not the name.</p>
+                </article>
+                <article class="mistake">
+                  <span class="mistake-label">Skipping a tier</span>
+                  <code class="bad">{blue.700}</code>
+                  <span class="mistake-arrow">→</span>
+                  <code class="good">{semantic.color.accent.solid}</code>
+                  <p>Component tokens reference semantic.</p>
+                </article>
+                <article class="mistake">
+                  <span class="mistake-label">Editing output</span>
+                  <code class="bad">dist/variables.css</code>
+                  <span class="mistake-arrow">→</span>
+                  <code class="good">tokens/component/button.json</code>
+                  <p>The next build will overwrite you.</p>
+                </article>
+                <article class="mistake">
+                  <span class="mistake-label">Broken graph</span>
+                  <code class="bad">dependsOn: []</code>
+                  <span class="mistake-arrow">→</span>
+                  <code class="good">dependsOn: ["^build"]</code>
+                  <p>Stale builds are a graph problem.</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="takeaway">
+              <span class="takeaway-dot"></span>
+              <p><strong>Most failures are boundary failures.</strong> Fix the rule, not the symptom.</p>
+            </div>
+            <aside class="notes">
+              These are the mistakes I see most often. Raw hex is the obvious one. Dynamic Tailwind
+              classes are the sneaky one. Mode-specific names and skipped tiers are the ones that hurt
+              six months later. Editing dist is always temporary.
+            </aside>
+          </section>
+
+          <!-- 33 · TAKEAWAYS -->
+          <section class="slide" data-part="Wrap-up" data-title="Five takeaways">
+            <div class="eyebrow">Wrap-up</div>
+            <h2 class="slide-title">Five things to <em>remember</em></h2>
+
+            <div class="content">
+              <div class="takeaway-list">
+                <div class="takeaway-item">
+                  <span class="takeaway-num">01</span>
+                  <p><strong>A monorepo is a coordination model.</strong> One history, many boundaries, explicit ownership.</p>
+                </div>
+                <div class="takeaway-item">
+                  <span class="takeaway-num">02</span>
+                  <p><strong>Turborepo is three ideas.</strong> Workspace, task graph, content cache.</p>
+                </div>
+                <div class="takeaway-item">
+                  <span class="takeaway-num">03</span>
+                  <p><strong>Workspace for building. Packages for consuming.</strong> Add a remote cache when CI repeats work.</p>
+                </div>
+                <div class="takeaway-item">
+                  <span class="takeaway-num">04</span>
+                  <p><strong>Tokens are a three-tier contract.</strong> Primitive → semantic → component, one direction.</p>
+                </div>
+                <div class="takeaway-item">
+                  <span class="takeaway-num">05</span>
+                  <p><strong>One pipeline.</strong> Figma → JSON → build → code → CI. Protect it, and design and code stay in sync.</p>
+                </div>
+              </div>
+
+              <div class="closing-quote">
+                <span class="quote-mark" aria-hidden="true">“</span>
+                <p>Keep the source of truth shared, and the system stays <strong>small enough to change</strong>.</p>
+              </div>
+            </div>
+            <aside class="notes">
+              Five takeaways. If the audience remembers one, make it the third: workspace for building,
+              packages for consuming. That is the strategy decision that keeps both the repo and the
+              backend consumers sane.
+            </aside>
+          </section>
+
+          <!-- 34 · END -->
+          <section class="slide slide--end" data-part="Q&amp;A" data-title="Questions?">
+            <div class="end-glow" aria-hidden="true"></div>
+            <div class="end-inner">
+              <div class="eyebrow eyebrow--light">Thank you</div>
+              <h2 class="end-title">Questions<span>?</span></h2>
+              <p class="end-lead">Try the pipeline locally. Change a token. Watch the whole system move.</p>
+
+              <div class="end-actions">
+                <div class="end-action">
+                  <span class="end-action-label">Run it</span>
+                  <code>pnpm install && pnpm dev</code>
+                </div>
+                <div class="end-action">
+                  <span class="end-action-label">Build it</span>
+                  <code>pnpm tokens</code>
+                </div>
+                <div class="end-action">
+                  <span class="end-action-label">Ship it</span>
+                  <code>pnpm changeset</code>
+                </div>
+              </div>
+
+              <div class="end-meta">
+                <span><kbd>T</kbd> theme</span>
+                <span><kbd>O</kbd> outline</span>
+                <span><kbd>N</kbd> notes</span>
+                <span class="end-repo">my-design-system</span>
+              </div>
+            </div>
+            <aside class="notes">
+              End with a concrete invitation: clone the repo, run pnpm dev, switch the theme, and change
+              one token. That is the fastest way to understand the whole system. Then open the floor.
+            </aside>
+          </section>
+        </div>
+      </main>
+
+      <footer class="bottombar">
+        <div class="bottom-hint">
+          <span><kbd>←</kbd><kbd>→</kbd> navigate</span>
+          <span class="hint-dot"></span>
+          <span><kbd>O</kbd> outline</span>
+          <span class="hint-dot"></span>
+          <span><kbd>N</kbd> notes</span>
+        </div>
+        <div class="pager">
+          <button class="pager-btn" id="prevBtn" type="button" aria-label="Previous slide">←</button>
+          <span id="counter">01 / 34</span>
+          <button class="pager-btn" id="nextBtn" type="button" aria-label="Next slide">→</button>
+        </div>
+      </footer>
+    </div>
+
+    <div class="outline-overlay" id="outlineOverlay" aria-hidden="true">
+      <div class="outline-panel" role="dialog" aria-modal="true" aria-labelledby="outlineTitle">
+        <div class="outline-head">
+          <div>
+            <div class="eyebrow">Navigate</div>
+            <h2 id="outlineTitle">Outline</h2>
+          </div>
+          <button class="icon-btn" id="outlineClose" type="button" aria-label="Close outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="outline-grid" id="outlineGrid"></div>
+        <div class="outline-foot">
+          <span><kbd>←</kbd><kbd>→</kbd> move</span>
+          <span><kbd>Esc</kbd> close</span>
+          <span><kbd>N</kbd> notes</span>
+          <span><kbd>T</kbd> theme</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-panel" id="notesPanel" aria-hidden="true">
+      <div class="notes-head">
+        <div>
+          <span class="notes-kicker">Speaker notes</span>
+          <strong id="notesTitle">Slide</strong>
+        </div>
+        <button class="icon-btn" id="notesClose" type="button" aria-label="Close speaker notes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="notes-body" id="notesBody"></div>
+    </div>
+
+    <script src="deck.js"></script>
+  </body>
+</html>
